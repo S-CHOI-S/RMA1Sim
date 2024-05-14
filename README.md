@@ -7,13 +7,13 @@
 __Essential 1.__ Dependencies
 > Install the following packages before using RaiSim: eigen library, cmake
 ```shell
-sudo apt install libeigen3-dev cmake
+$ sudo apt install libeigen3-dev cmake
 ```
 
 __Essential 2.__ RaiSim
 > RaiSim is the physics engine developed by RaiSim Tech Inc.: [raisimTech/raisimLib](https://github.com/raisimTech/raisimLib.git)
 ```shell
-git clone https://github.com/S-CHOI-S/RaiSim-RL.git
+$ git clone https://github.com/S-CHOI-S/RaiSim-RL.git
 ```
 > [!note]
 > After cloned the RaiSim repository, you should follow the instructions on [installation page](https://raisim.com/sections/Installation.html)
@@ -31,8 +31,14 @@ __Essential 3.__ RaisimGymTorch
 > A simple pytorch-based RL framework is provided as well but it should work well with any other RL frameworks!
 
 ```shell
-cd {$workspace_dir}/raisimLib/raisimGymTorch
+$ cd {$workspace_dir}/raisimLib/raisimGymTorch
 ```
 ```shell
-python setup.py develop
+$ python setup.py develop
 ```
+
+<br/>
+
+## Usage
+__Step 1.__ Visualize
+> You can check the robot (unity renderer)
