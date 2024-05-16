@@ -29,6 +29,7 @@ args = parser.parse_args()
 
 # check if gpu is available
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+print('device:',device)
 
 # directories
 task_path = os.path.dirname(os.path.realpath(__file__))
@@ -195,7 +196,7 @@ if args.loadid is not None:
 
 
 # This coefficient controls how much the policy is optimized with RL. Change to 1 for taking away demonstrations from a previous policy.
-rl_coeff = 0.3
+rl_coeff = 1 # default: 0.3
 ppo.update_rl_coeff(rl_coeff)
 
 

@@ -954,13 +954,13 @@ namespace raisim
     double compute_forward_reward()
     {
       double r = 0.;
-      double forward_r = adaptiveForwardVelRewardCoeff_ * std::min(max_speed, bodyLinearVel_[0]);
+      double forward_r = adaptiveForwardVelRewardCoeff_ * std::min(max_speed, bodyLinearVel_[1]);
       // Do not go too fast, but track!
-      if (isDown && bodyLinearVel_[0] > (max_speed+0.1))
-      	forward_r -= adaptiveForwardVelRewardCoeff_ * (bodyLinearVel_[0] - max_speed);
+      if (isDown && bodyLinearVel_[1] > (max_speed+0.1))
+      	forward_r -= adaptiveForwardVelRewardCoeff_ * (bodyLinearVel_[1] - max_speed);
       double angular_r = adaptiveAngularVelRewardCoeff_ * (-std::abs(ang_speed - bodyAngularVel_[2]) + std::abs(ang_speed));
       r += forward_r;
-      r += -abs(bodyLinearVel_[1]);
+      r += -abs(bodyLinearVel_[0]);
       r += angular_r;
       r += (alive_bonus * 1. / (2. - (double)isSlope));
       return r;
