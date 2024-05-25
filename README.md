@@ -1,5 +1,6 @@
 # Developing an Adaptive Locomotion Strategy for a Quadruped Robot
-> [MEU5053] Machine Learning And Programming (2024Y: First Semester)
+#### [MEU5053] Machine Learning And Programming (2024Y: First Semester)  
+> This project referred to Antonilo's research on [rl_locomotion](https://github.com/antonilo/rl_locomotion)
 
 <br/>
 
@@ -65,25 +66,35 @@ $ python setup.py develop
 <br/>
 
 ## Usage
-__Step 1.__ Run RaisimUnity
+__Step 1.__ Train the policy
+> GPU_NUM can be found with the command ```nvidia-smi```!  
+> EXPT_ID will be your data file number.
+```shell
+$ cd {$workspace_dir}/raisimLib/raisimGymTorch/raisimGymTorch/env/envs/rsg_a1_task
+```
+```shell
+$ python runner.py --name random --gpu GPU_NUM --exptid EXPT_ID 
+```
+
+__Step 2.__ Run RaisimUnity
 > You can check the robot using the Unity renderer.
 ```shell
-$ cd ~/raisim_ws/raisimLib/raisimUnity/"OS" # e.g. cd raisim_ws/raisimLib/raisimUnity/linux
+$ cd {$workspace_dir}/raisimLib/raisimUnity/"OS" # e.g. cd raisim_ws/raisimLib/raisimUnity/linux
 ```
 ``` shell
 $ ./raisimUnity.x86_64
 ```
 
-__Step 2.__ Visualize Policy
+__Step 3.__ Visualize the policy
 > You may run the code in your conda env!
 ```shell
-$ cd ~/raisim_ws/raisimLib/raisimGymTorch/raisimGymTorch/env/envs/rsg_a1_task
+$ cd {$workspace_dir}/raisimLib/raisimGymTorch/raisimGymTorch/env/envs/rsg_a1_task
 ```
 > EXPT_ID and POLICY_ID can be found in the ```raisimGymTorch/data/rsg_a1_task``` directory!
 ```shell
 $ python viz_policy.py ../../../../data/rsg_a1_task/EXPT_ID POLICY_ID
 ```
-<img align="left" src="https://github.com/S-CHOI-S/RaiSim-RL/assets/113012648/955bd5e6-28eb-443d-8f11-0275cb1e2773" width="50%"/>
+<img align="left" src="https://github.com/S-CHOI-S/RaiSim-RL/assets/113012648/955bd5e6-28eb-443d-8f11-0275cb1e2773" width="45%"/>
 </br></br></br>
 
 ```shell
@@ -91,3 +102,4 @@ $ python viz_policy.py ../../../../data/rsg_a1_task/EXPT_ID POLICY_ID
 $ python viz_policy.py \
   ../../../../data/rsg_a1_task/0001 2000
 ```
+
