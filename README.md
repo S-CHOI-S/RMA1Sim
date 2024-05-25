@@ -65,5 +65,29 @@ $ python setup.py develop
 <br/>
 
 ## Usage
-__Step 1.__ Visualize
-> You can check the robot (unity renderer)
+__Step 1.__ Run RaisimUnity
+> You can check the robot using the Unity renderer.
+```shell
+$ cd ~/raisim_ws/raisimLib/raisimUnity/"OS" # e.g. cd raisim_ws/raisimLib/raisimUnity/linux
+```
+``` shell
+$ ./raisimUnity.x86_64
+```
+
+__Step 2.__ Visualize Policy
+> You may run the code in your conda env!
+```shell
+$ cd ~/raisim_ws/raisimLib/raisimGymTorch/raisimGymTorch/env/envs/rsg_a1_task
+```
+> EXPT_ID and POLICY_ID can be found in the ```raisimGymTorch/data/rsg_a1_task``` directory!
+```shell
+$ python viz_policy.py ../../../../data/rsg_a1_task/EXPT_ID POLICY_ID
+```
+<img align="left" src="https://github.com/S-CHOI-S/RaiSim-RL/assets/113012648/955bd5e6-28eb-443d-8f11-0275cb1e2773" width="50%"/>
+</br></br>
+
+```shell
+# e.g. EXPT_ID = 0001, POLICY_ID = 2000
+$ python viz_policy.py \
+  ../../../../data/rsg_a1_task/0001 2000
+```
