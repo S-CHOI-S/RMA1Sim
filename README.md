@@ -15,6 +15,8 @@
   ![PyTorch](https://img.shields.io/badge/PyTorch-%23EE4C2C.svg?style=for-the-badge&logo=PyTorch&logoColor=white)
   ![ROS](https://img.shields.io/badge/ROS-22314E?style=for-the-badge&logo=ROS&logoColor=white)
 
+  <img src="https://github.com/S-CHOI-S/RMA1Sim/assets/113012648/2ea45869-1ed0-47af-a532-2da49b58f787" width="70%"/>
+
 <br/>
 
 ## Contributions
