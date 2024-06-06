@@ -115,7 +115,7 @@ $ python viz_policy.py ../../../../data/rsg_a1_task/EXPT_ID POLICY_ID
 $ python viz_policy.py \
   ../../../../data/rsg_a1_task/0001 2000
 ```
-</br></br></br>
+</br></br>
 
 > [!Tip]
 > If you want to download the pretrained data, please download the [RMA1Sim](https://drive.google.com/drive/folders/1mAwB3S2jnIrxw_yQOmWcerQ_lsq68K87?usp=sharing) file!
