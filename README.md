@@ -9,7 +9,7 @@
   Training quadruped robots on rough terrain is crucial as it significantly enhances the robots' stability, adaptability, practicality, durability, obstacle-handling capabilities, and problem-solving skills. The real world is not always flat, and for quadruped robots to operate effectively in various environments, adaptability to rough terrain is essential. This training enables the robots to maintain balance and navigate unpredictable obstacles or irregular surfaces stably, maximizing performance in diverse real-world applications such as military operations, disaster response, and exploration. Additionally, training on rough terrain makes robots more robust and durable, reducing maintenance costs and downtime, and allows them to efficiently recognize and overcome various obstacles, increasing mission success rates and ensuring safe operation. Through reinforcement learning, robots experience diverse scenarios, improving problem-solving abilities and enabling better path planning and decision-making.
 
 - __Project Badges:__  
-  <img src="https://github.com/S-CHOI-S/RaiSim-RL/assets/113012648/5cf57e38-41c6-4639-9de8-b93a78283984" width="4%"/>
+  <img src="https://github.com/S-CHOI-S/RaiSim-RL/assets/113012648/5cf57e38-41c6-4639-9de8-b93a78283984" width="3.5%"/>
   ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
   ![C++](https://img.shields.io/badge/c++-%2300599C.svg?style=for-the-badge&logo=c%2B%2B&logoColor=white)
   ![PyTorch](https://img.shields.io/badge/PyTorch-%23EE4C2C.svg?style=for-the-badge&logo=PyTorch&logoColor=white)
