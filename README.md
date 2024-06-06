@@ -108,7 +108,7 @@ $ cd {$workspace_dir}/raisimLib/raisimGymTorch/raisimGymTorch/env/envs/rsg_a1_ta
 $ python viz_policy.py ../../../../data/rsg_a1_task/EXPT_ID POLICY_ID
 ```
 <img align="left" src="https://github.com/S-CHOI-S/RaiSim-RL/assets/113012648/955bd5e6-28eb-443d-8f11-0275cb1e2773" width="45%"/>
-</br></br></br></br>
+</br></br></br>
 
 ```shell
 # e.g. EXPT_ID = 0001, POLICY_ID = 2000
