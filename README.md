@@ -2,6 +2,19 @@
 #### [MEU5053] Machine Learning And Programming (2024Y: First Semester)  
 > This project referred to Antonilo's research on [rl_locomotion](https://github.com/antonilo/rl_locomotion)
 
+- __Goal of the project:__  
+  Our goal is to train a __quadruped robot__ using __reinforcement learning (RL)__. The objective is to enable the robot to learn robust walking and running on various surfaces, including flat terrain and rough terrain. Quadruped robots offer greater stability and speed compared to bipedal robots, making them suitable for applications such as military operations, factory management, and other fields. By leveraging reinforcement learning, we aim to enhance the capabilities of quadruped robots, making them more adaptable and versatile in various fields. Reinforcement learning allows the robot to learn from its experiences, improving its performance over time as it encounters different scenarios and terrains. Through iterative training and real-world testing, we hope to create quadruped robots that are not only capable but also resilient and reliable in performing their designated tasks.
+
+- __The importance of training on rough terrain:__  
+  Training quadruped robots on rough terrain is crucial as it significantly enhances the robots' stability, adaptability, practicality, durability, obstacle-handling capabilities, and problem-solving skills. The real world is not always flat, and for quadruped robots to operate effectively in various environments, adaptability to rough terrain is essential. This training enables the robots to maintain balance and navigate unpredictable obstacles or irregular surfaces stably, maximizing performance in diverse real-world applications such as military operations, disaster response, and exploration. Additionally, training on rough terrain makes robots more robust and durable, reducing maintenance costs and downtime, and allows them to efficiently recognize and overcome various obstacles, increasing mission success rates and ensuring safe operation. Through reinforcement learning, robots experience diverse scenarios, improving problem-solving abilities and enabling better path planning and decision-making.
+
+- __Project Badges:__  
+  <img src="https://github.com/S-CHOI-S/RaiSim-RL/assets/113012648/5cf57e38-41c6-4639-9de8-b93a78283984" width="3%"/>
+  ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
+  ![C++](https://img.shields.io/badge/c++-%2300599C.svg?style=for-the-badge&logo=c%2B%2B&logoColor=white)
+  ![PyTorch](https://img.shields.io/badge/PyTorch-%23EE4C2C.svg?style=for-the-badge&logo=PyTorch&logoColor=white)
+  ![ROS](https://img.shields.io/badge/ROS-22314E?style=for-the-badge&logo=ROS&logoColor=white)
+
 <br/>
 
 ## Contributions
