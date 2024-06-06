@@ -31,7 +31,10 @@
 * __Sample efficiency__  
   PPO achieved sample efficiency because of its usage of surrogate objectives.  
   The surrogate objectives enable PPO to avoid the new policy changing too far from the old policy;  
-  the clip function regularizes the policy update and reuses training data.
+  the clip function regularizes the policy update and reuses training data.  
+
+  ✔️ _Objective Function_
+    $$\max_θ \mathbb{E}[min(ρ(s,a)⋅A(s,a),clip(ρ(s,a),1−ϵ,1+ϵ)⋅A(s,a))]$$
 
 ### 2. RMA Algorithm
 > __[Rapid Motor Adaptation (RMA)](https://arxiv.org/abs/2107.04034)__ algorithm can solve the problem of real-time adaptation to unseen scenarios like changing terrains, changing payload, wear and tear for successful real-world deployments.
