@@ -14,6 +14,7 @@
   ![C++](https://img.shields.io/badge/c++-%2300599C.svg?style=for-the-badge&logo=c%2B%2B&logoColor=white)
   ![PyTorch](https://img.shields.io/badge/PyTorch-%23EE4C2C.svg?style=for-the-badge&logo=PyTorch&logoColor=white)
   ![ROS](https://img.shields.io/badge/ROS-22314E?style=for-the-badge&logo=ROS&logoColor=white)
+  ![Unity](https://img.shields.io/badge/unity-%23000000.svg?style=for-the-badge&logo=unity&logoColor=white)
 
   <img src="https://github.com/S-CHOI-S/RMA1Sim/assets/113012648/2ea45869-1ed0-47af-a532-2da49b58f787" width="70%"/>
 
@@ -35,6 +36,9 @@
   The surrogate objectives enable PPO to avoid the new policy changing too far from the old policy;  
   the clip function regularizes the policy update and reuses training data.  
 
+  ✔️ _Probability Ratio_
+    $$\rho(s,a) = {{π_θ(a_t∣s_t)} \over {π_{θ_{old}}(a_t∣s_t)}}$$
+  
   ✔️ _Objective Function_
     $$\max_θ \mathbb{E}[min(ρ(s,a)⋅A(s,a),clip(ρ(s,a),1−ϵ,1+ϵ)⋅A(s,a))]$$
 
@@ -48,7 +52,7 @@
   - __Deployment__  
     During deployment, the adaptation module $\phi$ generates the extrinsics $\hat{z}_t$ at 10Hz, and the base policy generates the desired joint positions at 100Hz, which are converted to torques using A1's PD controller. Since the adaptation module operates at a lower frequency, the base policy uses the most recent extrinsics vector $\hat{z}_t$ predicted by the adaptation module to predict $a_t$.
 
-  &nbsp;&nbsp;&nbsp;<img src="https://github.com/S-CHOI-S/RMA1Sim/assets/113012648/af132998-039a-4230-87b3-b1a508752da5" width="70%" height="70%"/>
+  &nbsp;&nbsp;&nbsp;<img src="https://github.com/S-CHOI-S/RMA1Sim/assets/113012648/af132998-039a-4230-87b3-b1a508752da5" width="80%" height="80%"/>
 
 
 
