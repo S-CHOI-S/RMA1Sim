@@ -143,3 +143,10 @@ $ python viz_policy.py \
 ## Discussion
 
 ### Reference
+- https://raisim.com/
+- https://github.com/raisimTech/raisimLib.git
+- https://arxiv.org/abs/1707.06347
+- https://arxiv.org/abs/2107.04034
+- https://github.com/antonilo/rl_locomotion.git
+- https://ashish-kmr.github.io/rma-legged-robots/
+  
