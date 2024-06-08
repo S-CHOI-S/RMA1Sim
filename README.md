@@ -40,9 +40,17 @@
 
 ### 2. RMA Algorithm
 > __[Rapid Motor Adaptation (RMA)](https://arxiv.org/abs/2107.04034)__ algorithm can solve the problem of real-time adaptation to unseen scenarios like changing terrains, changing payload, wear and tear for successful real-world deployments.
-<div style="float: left;">
-  <img src="https://github.com/S-CHOI-S/RaiSim-RL/assets/113012648/e1766812-8d26-4bd2-9f88-6963267f685f" width="70%" height="70%"/>
-</div>
+
+- __Structure of RMA__  
+  RMA consists of a base policy and an adaptation module, each performing specific roles during training and deployment. The base policy is trained in simulation using model-free RL, while the adaptation module predicts environmental factors from real-world data. During deployment, the adaptation module generates environmental factors at a lower frequency, and the base policy uses these factors at a higher frequency to determine the robot's actions. This asynchronous design enables smooth operation on low-cost robots with limited computational resources.
+  - __Training in Simulation__  
+  In the first phase, the base policy $\pi$ takes as input the current state $x_t$, previous action $a_{t-1}$, and the privileged environmental factors $e_t$. These environmental factors are encoded into the latent extrinsics vector $z_t$ using the environmental factor encoder $\mu$. The base policy is trained in simulation using model-free reinforcement learning (RL). In the second phase, the adaptation module $\phi$ is trained via supervised learning to predict the extrinsics $\hat{z}_t$ from the history of states and actions.
+  - __Deployment__  
+    During deployment, the adaptation module $\phi$ generates the extrinsics $\hat{z}_t$ at 10Hz, and the base policy generates the desired joint positions at 100Hz, which are converted to torques using A1's PD controller. Since the adaptation module operates at a lower frequency, the base policy uses the most recent extrinsics vector $\hat{z}_t$ predicted by the adaptation module to predict $a_t$.
+
+    <div style="float: left;">
+      <img src="https://github.com/S-CHOI-S/RaiSim-RL/assets/113012648/e1766812-8d26-4bd2-9f88-6963267f685f" width="70%" height="70%"/>
+    </div>
 
 
 <br/>
