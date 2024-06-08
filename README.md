@@ -48,9 +48,8 @@
   - __Deployment__  
     During deployment, the adaptation module $\phi$ generates the extrinsics $\hat{z}_t$ at 10Hz, and the base policy generates the desired joint positions at 100Hz, which are converted to torques using A1's PD controller. Since the adaptation module operates at a lower frequency, the base policy uses the most recent extrinsics vector $\hat{z}_t$ predicted by the adaptation module to predict $a_t$.
 
-    <div style="float: left;">
-      <img src="https://github.com/S-CHOI-S/RaiSim-RL/assets/113012648/e1766812-8d26-4bd2-9f88-6963267f685f" width="70%" height="70%"/>
-    </div>
+  &nbsp;&nbsp;&nbsp;<img src="https://github.com/S-CHOI-S/RMA1Sim/assets/113012648/af132998-039a-4230-87b3-b1a508752da5" width="70%" height="70%"/>
+
 
 
 <br/>
