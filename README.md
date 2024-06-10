@@ -84,7 +84,7 @@
 - **Improved Mission Capabilities**  
    Equipped with jumping abilities, the robot can perform efficiently in diverse missions like exploration, rescue, and military operations.
 
-<img src="https://www.mdpi.com/biomimetics/biomimetics-08-00036/article_deploy/html/images/biomimetics-08-00036-g001.png" />
+<a href="https://www.mdpi.com/2313-7673/8/1/36"><img src="https://www.mdpi.com/biomimetics/biomimetics-08-00036/article_deploy/html/images/biomimetics-08-00036-g001.png"/></a>
 
 ### 5. Sim-to-Real
 > __Sim-to-real__ refers to the ability of a model trained in a simulated environment to perform effectively in real-world conditions. It's commonly used in robotics and artificial intelligence, ensuring seamless transition from simulation to reality.
