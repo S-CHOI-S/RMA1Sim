@@ -54,7 +54,53 @@
 
   &nbsp;&nbsp;&nbsp;<img src="https://github.com/S-CHOI-S/RMA1Sim/assets/113012648/af132998-039a-4230-87b3-b1a508752da5" width="80%" height="80%"/>
 
+### 3. Diversity is All You Need
+> __[Diversity is All You Need (DIAYN)](https://arxiv.org/abs/1802.06070)__ is an algorithm focused on generating diverse behaviors in reinforcement learning, promoting variety in control tasks to help agents learn more generalized actions. Its primary goal is to train agents on diverse policies, enabling them to adapt to various situations.
 
+- __Limitations of RMA__
+  - __Lack of diverse behavior learning__  
+    RMA focuses primarily on achieving specific goals, which can limit its ability to learn diverse behavior patterns. This may restrict adaptability and flexibility in new situations.
+  - __Difficulty in using intrinsic rewards__  
+    RMA tends to rely on external rewards, making effective learning challenging in situations with sparse reward signals. This means that significant effort is required in reward engineering.
+- __Application of DIAYN__  
+  - __Diverse Behavior Learning__  
+    DIAYN encourages the agent to learn a variety of skills (behaviors). This allows the agent to adapt to different situations by learning diverse behavior patterns, making it better able to respond to changes in the environment.
+  - __Intrinsic Reward Structure__  
+    DIAYN learns using intrinsic reward functions without relying on external rewards. This reduces the need for complex reward engineering and enables the agent to effectively learn in various situations.
+  - __Generalized Policy Learning__  
+    DIAYN trains the agent on diverse policies, enabling it to perform generalized behaviors across multiple environments. This helps overcome the adaptation limitations of RMA.
+  - __Enhanced Exploration__  
+    DIAYN encourages the agent to try diverse behaviors, thereby enhancing exploration. This increases adaptability in new environments and ensures efficient performance in a variety of situations.
+
+  <img src="https://github.com/S-CHOI-S/RMA1Sim/assets/113012648/f73fcf77-1044-4134-a459-66bbbc531596" width="80%"/>
+
+### 4. Jumping in Discontinuous Terrain
+> __Jumping in discontinuous terrain__ significantly enhances the mobility and adaptability of quadruped robots, enabling efficient and safe operation in various missions.
+
+- **Obstacle Navigation and Speed Enhancement**  
+   Jumping allows the robot to quickly overcome obstacles such as rocks, branches, and gaps, enabling it to traverse complex terrain more efficiently and faster than walking.
+- **Safe and Adaptable Movement**  
+   Jumping ensures safe navigation over small gaps or cracks in discontinuous terrain and enhances the robot's adaptability to various environments, expanding its usability.
+- **Improved Mission Capabilities**  
+   Equipped with jumping abilities, the robot can perform efficiently in diverse missions like exploration, rescue, and military operations.
+
+<img src="https://www.mdpi.com/biomimetics/biomimetics-08-00036/article_deploy/html/images/biomimetics-08-00036-g001.png" />
+
+### 5. Sim-to-Real
+> __Sim-to-real__ refers to the ability of a model trained in a simulated environment to perform effectively in real-world conditions. It's commonly used in robotics and artificial intelligence, ensuring seamless transition from simulation to reality.
+
+- __Real-world Performance Evaluation__  
+  Simulations may not perfectly replicate the real world and unexpected issues can arise. Therefore, it is important to evaluate and test algorithms on actual robots.
+- __Adaptation to Environmental Changes__  
+  Simulations may struggle to anticipate unexpected environmental changes or external factors. Using real robots allows for real-time detection and adaptation to environmental conditions.
+- __Assessment of Robot's Actual Behavior__  
+  Simulations often make assumptions about ideal behavior or constraints that may not hold true for real robots. Thus, evaluating algorithms on real robots provides feedback on their actual performance.
+- __Realistic Data Collection__  
+  Data collected by robots in real environments is more realistic and useful than data generated in simulations. This data aids in developing more accurate modeling and effective control algorithms.
+- __Practicality__  
+  Robot technology must be applied in the real world to be useful. Therefore, testing and developing algorithms on real robots is essential.
+
+&nbsp;&nbsp;&nbsp;<img src="https://github.com/S-CHOI-S/RMA1Sim/assets/113012648/bce3c4e1-32a5-4d7d-a969-d80384b5756e" width="70%"/>
 
 <br/>
 
