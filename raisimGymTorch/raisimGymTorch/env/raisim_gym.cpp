@@ -17,6 +17,7 @@ int THREAD_COUNT = 1;
   #define ENVIRONMENT_NAME RaisimGymEnv
 #endif
 
+
 PYBIND11_MODULE(RAISIMGYM_TORCH_ENV_NAME, m) {
   py::class_<VectorizedEnvironment<ENVIRONMENT>>(m, RSG_MAKE_STR(ENVIRONMENT_NAME))
     .def(py::init<std::string, std::string>(), py::arg("resourceDir"), py::arg("cfg"))

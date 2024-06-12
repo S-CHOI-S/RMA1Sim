@@ -1,6 +1,5 @@
 from datetime import datetime
 import os
-import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -84,7 +83,7 @@ class PPO:
         self.storage.add_transitions(self.actor_obs, value_obs, self.actions, self.actor.action_mean, self.actor.distribution.std_np, rews, dones,
                                      self.actions_log_prob)
 
-    def update(self, actor_obs, value_obs, log_this_iteration, update):
+    def update(self,reward_value, actor_obs, value_obs, log_this_iteration, update):
         last_values = self.critic.predict(torch.from_numpy(value_obs).to(self.device))
 
         # Learning step
@@ -93,20 +92,21 @@ class PPO:
         self.storage.clear()
 
         if log_this_iteration:
-            self.log({**locals(), **infos, 'it': update})
+            self.log({**locals(), **infos, 'it': update},reward_value)
 
-    def log(self, variables):
+    def log(self, variables,reward_value):
         self.tot_timesteps += self.num_transitions_per_env * self.num_envs
         mean_std = self.actor.distribution.std.mean()
         self.writer.add_scalar('PPO/value_function', variables['mean_value_loss'], variables['it'])
         self.writer.add_scalar('PPO/surrogate', variables['mean_surrogate_loss'], variables['it'])
         self.writer.add_scalar('PPO/mean_noise_std', mean_std.item(), variables['it'])
         self.writer.add_scalar('PPO/learning_rate', self.learning_rate, variables['it'])
+        self.writer.add_scalar('PP0/reward_value', reward_value, variables['it'])
+
 
     def _train_step(self, log_this_iteration):
         mean_value_loss = 0
         mean_surrogate_loss = 0
-        
         for epoch in range(self.num_learning_epochs):
             for actor_obs_batch, critic_obs_batch, actions_batch, old_sigma_batch, old_mu_batch, current_values_batch, advantages_batch, returns_batch, old_actions_log_prob_batch \
                     in self.batch_sampler(self.num_mini_batches):
@@ -117,7 +117,7 @@ class PPO:
                 # Adjusting the learning rate using KL divergence
                 mu_batch = self.actor.action_mean
                 sigma_batch = self.actor.distribution.std
-                
+
                 # KL
                 if self.desired_kl != None and self.schedule == 'adaptive':
                     with torch.no_grad():
@@ -140,7 +140,6 @@ class PPO:
                                                                                    1.0 + self.clip_param)
                 surrogate_loss = torch.max(surrogate, surrogate_clipped).mean()
 
-                
                 # Value function loss
                 if self.use_clipped_value_loss:
                     value_clipped = current_values_batch + (value_batch - current_values_batch).clamp(-self.clip_param,
@@ -150,9 +149,9 @@ class PPO:
                     value_loss = torch.max(value_losses, value_losses_clipped).mean()
                 else:
                     value_loss = (returns_batch - value_batch).pow(2).mean()
-                
+
                 loss = surrogate_loss + self.value_loss_coef * value_loss - self.entropy_coef * entropy_batch.mean()
-                
+
                 # Gradient step
                 self.optimizer.zero_grad()
                 loss.backward()

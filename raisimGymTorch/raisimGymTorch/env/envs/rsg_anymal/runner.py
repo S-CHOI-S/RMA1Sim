@@ -14,7 +14,6 @@ import numpy as np
 import torch
 import datetime
 import argparse
-import csv
 
 # task specification
 task_name = "anymal_locomotion"
@@ -84,8 +83,7 @@ reward_analyzer = RewardAnalyzer(env, ppo.writer)
 if mode == 'retrain':
     load_param(weight_path, env, actor, critic, ppo.optimizer, saver.data_dir)
 
-output_data = []
-for update in range(1801):
+for update in range(1000000):
     start = time.time()
     env.reset()
     reward_sum = 0
@@ -137,8 +135,9 @@ for update in range(1801):
 
     # take st step to get value obs
     obs = env.observe()
-    ppo.update(actor_obs=obs, value_obs=obs, log_this_iteration=update % 10 == 0, update=update)
     average_ll_performance = reward_sum / total_steps
+    ppo.update(average_ll_performance, actor_obs=obs, value_obs=obs, log_this_iteration=update % 10 == 0, update=update)
+    #average_ll_performance = reward_sum / total_steps
     average_dones = done_sum / total_steps
     avg_rewards.append(average_ll_performance)
 
@@ -149,8 +148,7 @@ for update in range(1801):
     env.curriculum_callback()
 
     end = time.time()
-    output_data.append([update, average_ll_performance])
-    
+
     print('----------------------------------------------------')
     print('{:>6}th iteration'.format(update))
     print('{:<40} {:>6}'.format("average ll reward: ", '{:0.10f}'.format(average_ll_performance)))
@@ -160,7 +158,3 @@ for update in range(1801):
     print('{:<40} {:>6}'.format("real time factor: ", '{:6.0f}'.format(total_steps / (end - start)
                                                                        * cfg['environment']['control_dt'])))
     print('----------------------------------------------------\n')
-
-with open('output.csv', 'w', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow(output_data)

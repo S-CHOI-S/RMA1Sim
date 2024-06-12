@@ -6,267 +6,332 @@
 #pragma once
 
 #include <stdlib.h>
-#include <math.h>
 #include <set>
 #include "../../RaisimGymEnv.hpp"
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
+#include <cmath>
+
 
 namespace raisim {
 
-    class ENVIRONMENT : public RaisimGymEnv {
+class ENVIRONMENT : public RaisimGymEnv {
 
-    public:
+ public:
 
-        explicit ENVIRONMENT(const std::string& resourceDir, const Yaml::Node& cfg, bool visualizable) :
-                RaisimGymEnv(resourceDir, cfg), visualizable_(visualizable), normDist_(0, 1) {
+  explicit ENVIRONMENT(const std::string& resourceDir, const Yaml::Node& cfg, bool visualizable) :
+      RaisimGymEnv(resourceDir, cfg), visualizable_(visualizable), normDist_(0, 1) {
 
-            /// create world
-            world_ = std::make_unique<raisim::World>();
+    /// create world
+    world_ = std::make_unique<raisim::World>();
+    world_->setGravity(Eigen::Vector3d(0, 0, -9.81));
 
-            /// add objects
-            anymal_ = world_->addArticulatedSystem(resourceDir_+"/anymal/urdf/anymal.urdf");
-            anymal_->setName("anymal");
-            anymal_->setControlMode(raisim::ControlMode::PD_PLUS_FEEDFORWARD_TORQUE);
-            world_->addGround();
+    /// add objects
+    //a1_ = world_->addArticulatedSystem(resourceDir_+"/a1/urdf/a1.urdf");
+    a1_ = world_->addArticulatedSystem(resourceDir_+"/anymal/urdf/anymal.urdf");
+    a1_->setName("a1");
+    a1_->setControlMode(raisim::ControlMode::PD_PLUS_FEEDFORWARD_TORQUE);
+    auto ground = world_->addGround();
+    //world_->setMaterialPairProp("ground","a1_",0.8,0.5,0.1);
 
-            /// add box
-            
-            posError_.setZero();
-            READ_YAML(double, boxSize_, cfg["box"]["box_size"]);
-            READ_YAML(double, finalBoxHeight_, cfg["box"]["final_box_height"]);
-            READ_YAML(double, curriculumFactor_, cfg["curriculum"]["initial_factor"]);
-            READ_YAML(double, curriculumDecayFactor_, cfg["curriculum"]["decay_factor"]);
-            goalPos_ << 1.5, 0.0, 0.0;
-            goalVel_ << 0.0, 0.0, sqrt(2 * 10 * (finalBoxHeight_ + 0.5));
-            boxHeight_ = finalBoxHeight_;
-            // auto box_ = world_->addBox(boxSize_, boxSize_, boxHeight_, 100);
-            box_ = static_cast<raisim::Box*>(world_->addBox(boxSize_, boxSize_, boxHeight_, 100));
+    // add cylinder
+    cylinder_ = static_cast<raisim::Cylinder*>(world_->addCylinder(0.5, 2.5, 100));
+    cylinder_->setPosition(1.5, 0.0, 0.0);
+    cylinder_->setBodyType(raisim::BodyType::STATIC);
+    //
 
-            box_->setPosition(goalPos_(0), goalPos_(1), goalPos_(2) + boxHeight_ / 2);
-            box_->setBodyType(raisim::BodyType::STATIC);
+    /// get robot data
+    gcDim_ = a1_->getGeneralizedCoordinateDim();
+    gvDim_ = a1_->getDOF();
+    nJoints_ = gvDim_ - 6;
 
-            /// get robot data
-            gcDim_ = anymal_->getGeneralizedCoordinateDim();
-            gvDim_ = anymal_->getDOF();
-            nJoints_ = gvDim_ - 6;
+    /// initialize containers
+    gc_.setZero(gcDim_); gc_init_.setZero(gcDim_);
+    gv_.setZero(gvDim_); gv_init_.setZero(gvDim_);
+    pTarget_.setZero(gcDim_); vTarget_.setZero(gvDim_); pTarget12_.setZero(nJoints_);
 
-            /// initialize containers
-            gc_.setZero(gcDim_); gc_init_.setZero(gcDim_);
-            gv_.setZero(gvDim_); gv_init_.setZero(gvDim_);
-            pTarget_.setZero(gcDim_); vTarget_.setZero(gvDim_); pTarget12_.setZero(nJoints_);
+    /// this is nominal configuration of anymal and a1
 
-            /// this is nominal configuration of anymal
-            gc_init_ << 0, 0, 0.50, 1.0, 0.0, 0.0, 0.0, 0.03, 0.4, -0.8, -0.03, 0.4, -0.8, 0.03, -0.4, 0.8, -0.03, -0.4, 0.8;
+    //a1
+    //gc_init_ << 0, 0, 0.34, 1.0, 0.0, 0.0, 0.0, 0.05, 0.8, -1.4, -0.05, 0.8, -1.4, 0.05, 0.8, -1.4, -0.05, 0.8, -1.4;
+    // Eigen::VectorXd jointPgain(gvDim_), jointDgain(gvDim_);
+    //jointPgain.setZero(); jointPgain.tail(nJoints_).setConstant(55.0);
+    //jointDgain.setZero(); jointDgain.tail(nJoints_).setConstant(0.6);
 
-            /// set pd gains
-            Eigen::VectorXd jointPgain(gvDim_), jointDgain(gvDim_);
-            jointPgain.setZero(); jointPgain.tail(nJoints_).setConstant(50.0);
-            jointDgain.setZero(); jointDgain.tail(nJoints_).setConstant(0.2);
-            anymal_->setPdGains(jointPgain, jointDgain);
-            anymal_->setGeneralizedForce(Eigen::VectorXd::Zero(gvDim_));
+    //anymal
+    gc_init_ << 0, 0, 0.50, 1.0, 0.0, 0.0, 0.0, 0.03, 0.4, -0.8, -0.03, 0.4, -0.8, 0.03, -0.4, 0.8, -0.03, -0.4, 0.8;
+    Eigen::VectorXd jointPgain(gvDim_), jointDgain(gvDim_);
+    jointPgain.setZero(); jointPgain.tail(nJoints_).setConstant(50.0);
+    jointDgain.setZero(); jointDgain.tail(nJoints_).setConstant(0.2);
+    
+    /// set pd gains
+    //Eigen::VectorXd jointPgain(gvDim_), jointDgain(gvDim_);
 
-            /// MUST BE DONE FOR ALL ENVIRONMENTS
-            obDim_ = 36;
-            actionDim_ = nJoints_; actionMean_.setZero(actionDim_); actionStd_.setZero(actionDim_);
-            obDouble_.setZero(obDim_);
-            previousAction_.setZero(actionDim_);
+    a1_->setPdGains(jointPgain, jointDgain);
+    a1_->setGeneralizedForce(Eigen::VectorXd::Zero(gvDim_));
 
-            /// action scaling
-            actionMean_ = gc_init_.tail(nJoints_);
-            double action_std;
-            READ_YAML(double, action_std, cfg_["action_std"]) /// example of reading params from the config
-            actionStd_.setConstant(action_std);
-            previousAction_ << actionMean_;
+    /// MUST BE DONE FOR ALL ENVIRONMENTS
+    obDim_ = 38;  // 
+    actionDim_ = nJoints_; actionMean_.setZero(actionDim_); actionStd_.setZero(actionDim_);
+    obDouble_.setZero(obDim_);
 
-            /// Reward coefficients
-            READ_YAML(double, positionCoeff_, cfg["reward"]["position"]["coeff"]);
-            READ_YAML(double, jumpCoeff_, cfg["reward"]["jump"]["coeff"]);
-            READ_YAML(double, torqueCoeff_, cfg["reward"]["torque"]["coeff"]);
+    /// action scaling
+    actionMean_ = gc_init_.tail(nJoints_);
+    double action_std;
+    READ_YAML(double, action_std, cfg_["action_std"]) /// example of reading params from the config
+    actionStd_.setConstant(action_std);
 
-            /// indices of links that should not make contact with ground
-            footIndices_.insert(anymal_->getBodyIdx("LF_SHANK"));
-            footIndices_.insert(anymal_->getBodyIdx("RF_SHANK"));
-            footIndices_.insert(anymal_->getBodyIdx("LH_SHANK"));
-            footIndices_.insert(anymal_->getBodyIdx("RH_SHANK"));
+    /// Reward coefficients
+    rewards_.initializeFromConfigurationFile (cfg["reward"]);
 
-            /// visualize if it is the first environment
-            if (visualizable_) {
-                server_ = std::make_unique<raisim::RaisimServer>(world_.get());
-                server_->launchServer();
-                server_->focusOn(anymal_);
-            }
+    /// indices of links that should not make contact with ground
+
+    //a1
+    //footIndices_.insert(a1_->getBodyIdx("FR_calf"));
+    //footIndices_.insert(a1_->getBodyIdx("FL_calf"));
+    //footIndices_.insert(a1_->getBodyIdx("RR_calf"));
+    //footIndices_.insert(a1_->getBodyIdx("RL_calf"));
+
+    //anymal
+    footIndices_.insert(a1_->getBodyIdx("LF_SHANK"));
+    footIndices_.insert(a1_->getBodyIdx("RF_SHANK"));
+    footIndices_.insert(a1_->getBodyIdx("LH_SHANK"));
+    footIndices_.insert(a1_->getBodyIdx("RH_SHANK"));
+
+    /// visualize if it is the first environment
+    if (visualizable_) {
+      server_ = std::make_unique<raisim::RaisimServer>(world_.get());
+      server_ -> launchServer();
+      server_ -> focusOn(a1_);
+    }
+  }
+
+  void init() final { }
+
+  void reset() final {
+    a1_->setState(gc_init_, gv_init_);
+    updateObservation();
+  }
+
+  double generateBoundedGaussianNoise(double mean, double stdDev, double lowerBound, double upperBound) {
+    std::random_device rd;
+    std::mt19937 generator(rd());
+    std::normal_distribution<double> distribution(mean, stdDev);
+    
+    double value;
+    do {
+        value = distribution(generator);
+    } while (value < lowerBound || value > upperBound);
+
+    return value;
+  }
+
+  inline void printRandomNumber() {
+    int control  = 1; // train(random)- "0" , contorl mode - "1"
+    int rotation = 0;
+    int idx=0;
+    double radians =0;
+    if (control==0){
+      if (callCount==0) {
+        angle_<<0;
+        ac_<< 0, 0, 0;
+        std::srand(static_cast<unsigned int>(std::time(0)));
+        radians = ((static_cast<double>(std::rand()) / RAND_MAX)-0.5) * M_PI;
+        fixed1 = 0.5*std::cos(radians);
+        fixed2 = 0.5*std::sin(radians);
+      }
+      if (callCount < (THRESHOLD) ) {
+        // train for THRESHOLD times for each random command
+        ac_[0] = fixed1;
+        ac_[1] = fixed2;
+        ac_[2] = rotation;
+        ++callCount;
+      } 
+      else {
+        ac_[0] = 0.0;
+        ac_[1] = 0;
+        ac_[2] = rotation;
+        a1_->setState(gc_init_, gv_init_);
+        callCount=0;
+      }
+    }
+    else{
+      if (callCount==0) {
+        // reset
+        ac_<< 0, 0, 0;
+        angle_<<0;
+        }
+      if (callCount%1==0) {
+
+        ///random
+        //std::srand(static_cast<unsigned int>(std::time(0)));
+        //radians = ((static_cast<double>(std::rand()) / RAND_MAX)-0.5) * M_PI;
+        
+        /// half-circle
+        radians =  -(M_PI/2 -M_PI/1000.0*( callCount ));
+        fixed1 = 0.5*std::cos(radians);
+        fixed2 = 0.5*std::sin(radians);
+
+        /// self- control
+        //radians=  M_PI/2;
+        //fixed1 = 0.5*std::cos(radians);
+        //fixed2 = 0.5*std::sin(radians);
+       
+        std::cout << "direction : " <<  fixed1 <<  fixed2 << std::endl;
+      }
+      ac_[0] =  fixed1;
+      ac_[1] =  fixed2;
+      ac_[2] =  rotation;
+      callCount+=1;
+      // save 
+      std::ofstream file("anymal_half_circle_before.csv", std::ios::app);  // Append mode
+      if (file.is_open()) {
+            file << std::fixed << std::setprecision(6);  // Set precision for floating point numbers 
+            file << gc_[0] << "," << gc_[1] << "," << fixed1 <<  "," << fixed2 <<  "," << angle_[0] <<"\n";
+            file.close();
         }
 
-        void init() final { }
+    }
+    // difference between angle -> angle_[0]
+    double inner = (ac_[0] * gv_[0]) + (ac_[1] * gv_[1]);
+    double v1 = sqrt(pow(gv_[0], 2) + pow(gv_[1], 2));
+    double v2 = sqrt(pow(ac_[0], 2) + pow(ac_[1], 2));
+    double cosTheta=0;
+    if( v1 == 0 || v2 == 0 )
+      angle_[0] = 0;
+    else
+      cosTheta = inner / (v1*v2) ;
+      if ( cosTheta >  1.0) cosTheta =  1.0;
+      if ( cosTheta < -1.0) cosTheta = -1.0;
+      angle_[0] = acos(cosTheta);
+  }
+  double compute_forward_reward()
+    {
+    double r = 0.0;
+    double max_speed=0.5;
+    double ang_speed=0.0;
+    double adaptiveForwardVelRewardCoeff_=35.0;
+    double adaptiveAngularVelRewardCoeff_=25.0;
+    double angular_r = 0.0;
+    double forward_r = 0.0;
+    double z_rot = 0.0;
+    double pos = -10.0; 
+    double abs_v = std::sqrt(std::pow(gv_[1], 2.) + std::pow(gv_[0], 2.)); //current velocity
 
-        void reset() final {
-            anymal_->setState(gc_init_, gv_init_);
-            updateObservation();
-        }
+    // reward for following command direction
+    forward_r = adaptiveForwardVelRewardCoeff_ * (
+      std::min(std::abs(ac_[0]),std::abs(gv_[0]))
+      +std::min(std::abs(ac_[1]),std::abs(gv_[1])));
 
-        float step(const Eigen::Ref<EigenVec>& action) final {
-            /// action scaling
-            pTarget12_ = action.cast<double>();
-            pTarget12_ = pTarget12_.cwiseProduct(actionStd_);
-            pTarget12_ += actionMean_;
-            pTarget_.tail(nJoints_) = pTarget12_;
+    // penalty for exceed max velocity
+    if (abs_v > max_speed)
+      r += -adaptiveForwardVelRewardCoeff_ *abs_v;
 
-            anymal_->setPdTarget(pTarget_, vTarget_);
+    //  penalty for low bodyposition
+    if ( gc_[2]< 0.2 )
+      r += pos;
+    
+    // penalty for exceed command direction
+    if (gv_[0] > (ac_[0]+0.1) || gv_[0] < (ac_[0]- 0.1))
+  	    forward_r -= 20 * std::abs(gv_[0] - ac_[0]);
+    if (gv_[1] > (ac_[1]+0.1) || gv_[1] < (ac_[1]- 0.1))
+  	    forward_r -= 20 * std::abs(gv_[1] - ac_[1]);
 
-            positionReward_ = 0.0;
-            jumpReward_ = 0.0;
-            torqueReward_ = 0.0;
+    // yaw for z rotation 
+    z_rot=std::atan2(2.0 * (gc_[3]* gc_[6] + gc_[4] * gc_[5]), 1.0 - 2.0 * (gc_[5] * gc_[5] + gc_[6] * gc_[6]));
 
-            double lowerError = 5.0;
+    // penalty for  z rotation 
+    angular_r = adaptiveAngularVelRewardCoeff_ * (
+      - 5*abs(z_rot)
+      - 5*std::abs(angle_[0]));
 
-            auto current_box_height = goalPos_(2) + curriculumFactor_ * boxHeight_;
+    r += forward_r;
+    r += angular_r;
+    r += 18.0;  //live bouns
 
-            box_->setPosition(goalPos_(0), goalPos_(1), current_box_height - boxHeight_ / 2);
-            float howManySteps = 0.0;
-            for(int i=0; i< int(control_dt_ / simulation_dt_ + 1e-10); i++){
-                if(server_) server_->lockVisualizationServerMutex();
-                world_->integrate();
-                if(server_) server_->unlockVisualizationServerMutex();
-                updateObservation();
+    return r;
+  }
 
-                bool allFeetInAir = true;
-                for(auto& contact : anymal_->getContacts()){
-                    if(footIndices_.find(contact.getlocalBodyIndex()) != footIndices_.end()){
-                        allFeetInAir = false;
-                        break;
-                    }
-                }
+  float step(const Eigen::Ref<EigenVec>& action) final {
+    /// action scaling
+    pTarget12_ = action.cast<double>();
+    pTarget12_ = pTarget12_.cwiseProduct(actionStd_);
+    pTarget12_ += actionMean_;
+    pTarget_.tail(nJoints_) = pTarget12_;
 
-                // bool allFeetOnBox = true;
-                // for (auto& footIndex : footIndices_) {
-                //     raisim::Vec<3> footPos;
-                //     anymal_->getPosition(footIndex, footPos);
-                //     if (!(footPos[0] >= goalPos_[0] - boxSize_ / 2 && footPos[0] <= goalPos_[0] + boxSize_ / 2 &&
-                //         footPos[1] >= goalPos_[1] - boxSize_ / 2 && footPos[1] <= goalPos_[1] + boxSize_ / 2)) {
-                //         allFeetOnBox = false;
-                //         break;
-                //     }
-                // }
+    a1_->setPdTarget(pTarget_, vTarget_);
 
-                posError_ = goalPos_ - gc_.head(3);
-                float velError_ = (goalVel_ - gv_.head(3)).tail(2).norm();
-                torqueReward_ += torqueCoeff_ * anymal_->getGeneralizedForce().squaredNorm() * getSimulationTimeStep();
-                float xyError = posError_.norm();
-                
-                double bodyDirectionError = ((gv_.head(2)) - (bodyLinearVel_.head(2))).norm() + abs(bodyAngularVel_(0)) + 10 * abs(bodyAngularVel_(2));
-                double landingError = (gv_init_.tail(12) - gv_.tail(12)).norm() + (gc_init_.tail(12) - gc_.tail(12)).norm() + abs(current_box_height + 0.5 - gc_(2));
-                if(xyError < boxSize_ / 2){
-                    jumpReward_ += jumpCoeff_ * exp(-3 * landingError);
-                    positionReward_ += positionCoeff_ * exp(-3 * xyError);
-                }
-                else{
-                    jumpReward_ += jumpCoeff_ * exp(-5 * velError_ - 4 * bodyDirectionError);
-                    if(allFeetInAir){
-                        positionReward_ += positionCoeff_ * exp(-3 * xyError);
-                    }
-                }
-                
-                howManySteps_ += 1;
-            }
+    for(int i=0; i< int(control_dt_ / simulation_dt_ + 1e-10); i++){
+      if(server_) server_->lockVisualizationServerMutex();
+      world_->integrate();
+      if(server_) server_->unlockVisualizationServerMutex();
+    }
+    printRandomNumber();
+    updateObservation();
 
-            float reward = float(torqueReward_ + jumpReward_ + positionReward_);
-            // std::cout << "t, p, h" << torqueReward_ << positionReward_ << ", " << float(howManySteps_) << std::endl;
-            return reward;
-        }
+    rewards_.record("torque", a1_->getGeneralizedForce().squaredNorm());
+    rewards_.record("forwardVel", compute_forward_reward()/100);
 
-        void updateObservation() {
-            anymal_->getState(gc_, gv_);
-            raisim::Vec<4> quat;
-            raisim::Mat<3,3> rot;
-            quat[0] = gc_[3]; quat[1] = gc_[4]; quat[2] = gc_[5]; quat[3] = gc_[6];
-            raisim::quatToRotMat(quat, rot);
-            bodyLinearVel_ = rot.e().transpose() * gv_.segment(0, 3);
-            bodyAngularVel_ = rot.e().transpose() * gv_.segment(3, 3);
+    return rewards_.sum();
+  }
 
-            obDouble_ << gc_.head(3), /// body height
-                    rot.e().row(2).transpose(), /// body orientation
-                    gc_.tail(12), /// joint angles
-                    bodyLinearVel_, bodyAngularVel_, /// body linear&angular velocity
-                    gv_.tail(12);  /// joint velocity
+  void updateObservation() {
+    a1_->getState(gc_, gv_);
+    raisim::Vec<4> quat;
+    raisim::Mat<3,3> rot;
+    quat[0] = gc_[3]; quat[1] = gc_[4]; quat[2] = gc_[5]; quat[3] = gc_[6];
+    raisim::quatToRotMat(quat, rot);
+    bodyLinearVel_ = rot.e().transpose() * gv_.segment(0, 3);
+    bodyAngularVel_ = rot.e().transpose() * gv_.segment(3, 3);
+    std::cout << " angle_[0] " <<  angle_[0] << std::endl;
+    obDouble_ << gc_[2], /// body height
+        rot.e().row(2).transpose(), /// body orientation
+        gc_.tail(12), /// joint angles
+        bodyLinearVel_, bodyAngularVel_, /// body linear&angular velocity
+        gv_.tail(12), /// joint velocity
+        ac_[0],ac_[1],ac_[2],
+        angle_[0];
+  }
 
-            if (obDouble_.hasNaN()) {
-                std::cerr << "NaN detected in observation: " << obDouble_.transpose() << std::endl;
-            }
-        }
+  void observe(Eigen::Ref<EigenVec> ob) final {
+    /// convert it to float
+    ob = obDouble_.cast<float>();
+  }
 
-        void observe(Eigen::Ref<EigenVec> ob) final {
-            /// convert it to float
-            ob = obDouble_.cast<float>();
-        }
+  bool isTerminalState(float& terminalReward) final {
+    terminalReward = float(terminalRewardCoeff_);
 
-        bool isTerminalState(float& terminalReward) final {
-            terminalReward = float(terminalRewardCoeff_);
+    /// if the contact body is not feet
+    for(auto& contact: a1_->getContacts())
+      if(footIndices_.find(contact.getlocalBodyIndex()) == footIndices_.end())
+        return true;
 
-            /// if the contact body is not feet
-            for(auto& contact: anymal_->getContacts()){
-                // auto contactObject = world_->getObject(contact.getPairObjectIndex());
-                if(footIndices_.find(contact.getlocalBodyIndex()) == footIndices_.end())
-                    return true;
-            } 
+    terminalReward = 0.f;
+    return false;
+  }
 
-            auto xy_error = posError_.head(2).norm();
+  void curriculumUpdate() { };
 
-            if(xy_error > goalPos_.norm() + 0.2){
-                terminalReward = -0.1;
-                return true;
-            }
-            if(abs(gc_(1)) > boxSize_ / 2){
-                terminalReward = -0.1;
-                return true;
-            }
-            if(gc_(1) > goalPos_(1) + 0.3){
-                terminalReward = -0.1;
-                return true;
-            }
-
-
-            // auto joint_velocity = gv_.tail(12);
-            // for(int i=0; i < 12; i++){
-            //     if (abs(joint_velocity[i]) >= 40 + 40 * (0.98-curriculumFactor_)){
-            //         terminalReward = -1.f;
-            //         return true;
-            //     }
-            // }
-
-            terminalReward = 0.f;
-            return false;
-        }
-
-        void curriculumUpdate() final {
-            curriculumFactor_ = std::pow(curriculumFactor_, curriculumDecayFactor_);
-            auto current_cylinder_height = goalPos_(2) + (-boxHeight_/2 * (1-curriculumFactor_)) + curriculumFactor_ * boxHeight_/2 + boxHeight_/2;
-            RSINFO_IF(visualizable_, "Curriculum factor: "<< curriculumFactor_);
-            RSINFO_IF(visualizable_, "Current height: " << current_cylinder_height);
-        };
-
-    private:
-        int gcDim_, gvDim_, nJoints_;
-        int howManySteps_ = 0;
-        bool visualizable_ = false;
-        raisim::ArticulatedSystem* anymal_;
-        raisim::Box* box_;
-        Eigen::VectorXd gc_init_, gv_init_, gc_, gv_, pTarget_, pTarget12_, vTarget_;
-        double terminalRewardCoeff_ = -5.;
-        Eigen::VectorXd previousAction_;
-        Eigen::VectorXd actionMean_, actionStd_, obDouble_;
-        Eigen::Vector3d bodyLinearVel_, bodyAngularVel_;
-        Eigen::Vector3d goalPos_, posError_, goalVel_, velError_;
-        // Eigen::Vector4d footPos_;
-        std::set<size_t> footIndices_;
-        double boxSize_, boxHeight_ , finalBoxHeight_;
-        double positionReward_, jumpReward_, torqueReward_;
-        double positionCoeff_, jumpCoeff_, torqueCoeff_;
-        double curriculumFactor_, curriculumDecayFactor_;
-
-        /// these variables are not in use. They are placed to show you how to create a random number sampler.
-        std::normal_distribution<double> normDist_;
-        thread_local static std::mt19937 gen_;
-    };
-    thread_local std::mt19937 raisim::ENVIRONMENT::gen_;
+ private:
+  int gcDim_, gvDim_, nJoints_;
+  bool visualizable_ = false;
+  raisim::ArticulatedSystem* a1_;
+  raisim::Cylinder* cylinder_;
+  Eigen::VectorXd gc_init_, gv_init_, gc_, gv_, pTarget_, pTarget12_, vTarget_;
+  double terminalRewardCoeff_ = -10.;
+  Eigen::VectorXd actionMean_, actionStd_, obDouble_;
+  Eigen::Vector3d bodyLinearVel_, bodyAngularVel_,ac_,angle_;
+  std::set<size_t> footIndices_;
+  int callCount=0;
+  int THRESHOLD = 300; // 동일한 값을 출력할 횟수
+  double fixed1 = 0; // 일정 횟수까지 출력할 고정된 숫자
+  double fixed2 = 0;
+  /// these variables are not in use. They are placed to show you how to create a random number sampler.
+  std::normal_distribution<double> normDist_;
+  thread_local static std::mt19937 gen_;
+};
+thread_local std::mt19937 raisim::ENVIRONMENT::gen_;
 
 }
 

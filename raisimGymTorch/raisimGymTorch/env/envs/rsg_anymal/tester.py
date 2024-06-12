@@ -23,7 +23,6 @@ cfg = YAML().load(open(task_path + "/cfg.yaml", 'r'))
 
 # create environment from the configuration file
 cfg['environment']['num_envs'] = 1
-cfg['environment']['curriculum']['initial_factor'] = 1
 
 env = VecEnv(rsg_anymal.RaisimGymEnv(home_path + "/rsc", dump(cfg['environment'], Dumper=RoundTripDumper)), cfg['environment'])
 
@@ -56,7 +55,7 @@ else:
     env.turn_on_visualization()
 
     # max_steps = 1000000
-    max_steps = 1000 ## 10 secs
+    max_steps = 1070 ## 10 secs
 
     for step in range(max_steps):
         time.sleep(0.01)
