@@ -6,7 +6,6 @@
 
 int main(int argc, char* argv[]) {
   auto binaryPath = raisim::Path::setFromArgv(argv[0]);
-  raisim::World::setActivationKey(binaryPath.getDirectory() + "\\rsc\\activation.raisim");
 
   /// create raisim world
   raisim::World world;
@@ -49,12 +48,12 @@ int main(int argc, char* argv[]) {
     }
   }
 
-  /// launch raisim servear
+  /// launch raisim server
   raisim::RaisimServer server(&world);
   server.launchServer();
 
   for (int i = 0; i < 10000000; i++) {
-    raisim::MSLEEP(2);
+    RS_TIMED_LOOP(int(world.getTimeStep()*1e6))
     server.integrateWorldThreadSafe();
   }
 

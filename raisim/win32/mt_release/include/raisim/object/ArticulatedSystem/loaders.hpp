@@ -12,88 +12,6 @@
 
 namespace raisim {
 
-inline int countNumOfSpaces(const char *str) {
-  int iSpaces = 0;
-  for (unsigned int iLoop = 0; iLoop < (sizeof(str) / sizeof(str[0])); iLoop++)
-    if (str[iLoop] == ' ')
-      iSpaces++;
-  return iSpaces;
-}
-
-inline double firstNumber(const char *txt) {
-  double num;
-  std::string s(txt);
-  std::string delimiter = " ";
-
-  while (s.substr(0, 1) == " ")
-    s = s.substr(1, s.size());
-  std::string token = s.substr(0, s.find(delimiter));
-  num = std::stod(token);
-
-  return num;
-}
-
-inline Vec<3> char2Vec3(const char *txt) {
-  Vec<3> vec;
-  std::string s(txt);
-  std::string delimiter = " ";
-
-  for (int i = 0; i < 3; i++) {
-    while (s.substr(0, 1) == " ")
-      s = s.substr(1, s.size());
-    std::string token = s.substr(0, s.find(delimiter));
-    vec[i] = std::stod(token);
-    if (i != 2) s.erase(0, s.find(delimiter) + delimiter.length());
-  }
-  return vec;
-}
-
-inline Vec<2> char2Vec2(const char *txt) {
-  Vec<2> vec;
-  std::string s(txt);
-  std::string delimiter = " ";
-
-  for (int i = 0; i < 2; i++) {
-    while (s.substr(0, 1) == " ")
-      s = s.substr(1, s.size());
-    std::string token = s.substr(0, s.find(delimiter));
-    vec[i] = std::stod(token);
-    if (i != 1) s.erase(0, s.find(delimiter) + delimiter.length());
-  }
-  return vec;
-}
-
-inline Vec<6> char2Vec6(const char *txt) {
-  Vec<6> vec;
-  std::string s(txt);
-  std::string delimiter = " ";
-
-  for (int i = 0; i < 6; i++) {
-    while (s.substr(0, 1) == " ")
-      s = s.substr(1, s.size());
-
-    std::string token = s.substr(0, s.find(delimiter));
-    vec[i] = std::stod(token);
-    if (i != 5) s.erase(0, s.find(delimiter) + delimiter.length());
-  }
-  return vec;
-}
-
-inline Vec<4> char2Vec4(const char *txt) {
-  Vec<4> vec;
-  std::string s(txt);
-  std::string delimiter = " ";
-
-  for (int i = 0; i < 4; i++) {
-    while (s.substr(0, 1) == " ")
-      s = s.substr(1, s.size());
-    std::string token = s.substr(0, s.find(delimiter));
-    vec[i] = std::stod(token);
-    if (i != 3) s.erase(0, s.find(delimiter) + delimiter.length());
-  }
-  return vec;
-}
-
 namespace object {
 class ArticulatedSystem;
 }
@@ -102,10 +20,10 @@ namespace urdf {
 
 struct UrdfMaterial {
   UrdfMaterial() {
-    color = {0.7, 0.7, 0.7};
+    color = {0.7, 0.7, 0.7, 1.};
   }
   std::string name;
-  Vec<3> color;
+  Vec<4> color;
 };
 
 inline Shape::Type charToGeom(const std::string &txt) {
@@ -127,7 +45,8 @@ struct UrdfBody {
   UrdfBody() {
     origin.setZero();
     rot.setIdentity();
-    scale = {1.,1.,1.};
+    scale = {1., 1., 1.};
+    color = {0.7, 0.7, 0.7, -1.0};
   };
 
   Shape::Type shape;
@@ -135,7 +54,8 @@ struct UrdfBody {
   Vec<3> origin;
   Mat<3, 3> rot;
   Vec<3> scale;
-  std::vector<double> param;
+  Vec<4> param;
+  raisim::Vec<4> color;
   std::string mat;
   std::string collision_mat;
   std::string name;
@@ -158,13 +78,15 @@ struct UrdfJoint {
   UrdfJoint() {
     limit.setZero();
     origin.setZero();
-    axis[0] = 1; axis[1] = 0; axis[2] = 0;
+    axis[0] = 1;
+    axis[1] = 0;
+    axis[2] = 0;
     limit[0] = std::numeric_limits<double>::lowest();
     limit[1] = std::numeric_limits<double>::max();
     rot.setIdentity();
     springMountPos.setZero();
   }
-  std::string name = "", parent, child;
+  std::string name, parent, child;
   Joint::Type type;
   Vec<3> origin;
   Mat<3, 3> rot;
@@ -175,23 +97,28 @@ struct UrdfJoint {
   double stiffness = 0;
   double rotor_inertia = 0;
   double torque_limit = -1.;
+  double velocity_limit = 1e6;
   Vec<4> springMountPos;
 };
 
 struct UrdfLink {
   std::string name;
   UrdfJoint parentJoint;
-  UrdfLink* parent = nullptr;
+  UrdfLink *parent = nullptr;
   std::vector<UrdfLink *> child;
   std::vector<UrdfBody> visual, collision;
   UrdfLinkInertial inertial;
   Vec<4> color_;
+  std::vector<std::shared_ptr<Sensor>> sensor;
 };
 
 class LoadFromURDF2 {
 
  public:
-  LoadFromURDF2(ArticulatedSystem &system, std::string filePath, std::vector<std::string> jointOrder, bool isItAFilePath);
+  LoadFromURDF2(ArticulatedSystem &system,
+                const std::string& filePath,
+                std::vector<std::string> jointOrder,
+                bool isItAFilePath);
  private:
   void processLinkFromUrdf(const UrdfLink *urdfLink,
                            Child &raiLink,
@@ -199,16 +126,93 @@ class LoadFromURDF2 {
   std::map<std::string, UrdfMaterial> mats;
   std::string currentObject_;
 
-
 };
 }
 
 namespace mjcf {
-class LoadFromMJCF {
- public:
-  LoadFromMJCF(ArticulatedSystem &system, std::string filePath, std::vector<std::string> jointOrder);
+
+struct MjcfCompilerSetting {
+  std::string angle;
+  std::string eulerseq;
 };
-}
+
+class LoadFromMjcf {
+ public:
+  void load(ArticulatedSystem &sys,
+            RaiSimTinyXmlWrapper &c,
+            const std::unordered_map<std::string, RaiSimTinyXmlWrapper> &defaultDefaultNode,
+            const std::unordered_map<std::string, std::pair<std::string, Vec < 3>> >& mesh,
+            const MjcfCompilerSetting& setting);
+
+
+  template<typename T>
+  static bool readFromDefault(const std::unordered_map<std::string, RaiSimTinyXmlWrapper> &defaults,
+                              const std::string &className,
+                              const std::string &typeName,
+                              const std::string &attName,
+                              T &value) {
+    auto classNode = defaults.at(className).getChildrenMust(typeName)[0];
+    if(classNode.getAttributeIfExists(attName, value)) {
+      return true;
+    } else {
+      if(className == "default") {
+        return false;
+      } else {
+        std::string parent = defaults.at(className).template getAttributeMust<std::string>("parent");
+        return readFromDefault(defaults, parent, typeName, attName, value);
+      }
+    }
+  }
+
+  template<typename T>
+  static bool getParameter(const std::unordered_map<std::string, RaiSimTinyXmlWrapper> &defaults,
+                           const RaiSimTinyXmlWrapper &node,
+                           const std::string &typeName,
+                           const std::string &attName,
+                           T &value) {
+    bool result = false;
+    std::string className;
+    if (node.getAttributeIfExists("class", className)) {
+      if (defaults.find(className) == defaults.end())
+        node.errorMessage("class " + className + " not found in the default tag");
+
+      result = readFromDefault(defaults,className,typeName,attName,value);
+    } else {
+      result = defaults.at(typeName).getAttributeIfExists(attName, value);
+    }
+    return node.getAttributeIfExists(attName, value) || result;
+  }
+
+  static void getPoseAndParam(const std::unordered_map<std::string, RaiSimTinyXmlWrapper> &defaults,
+                              const RaiSimTinyXmlWrapper &node,
+                              Shape::Type type,
+                              const std::string &typeName,
+                              Vec<4> &param,
+                              Mat<3, 3> &rot,
+                              Vec<3> &pos,
+                              const MjcfCompilerSetting& setting);
+
+  static void getMjcfSizeParam(const RaiSimTinyXmlWrapper &g, Shape::Type type, Vec<4> &param);
+  static void getMjcfPos(const RaiSimTinyXmlWrapper &g, Vec<3> &pos);
+  static void posFromFromTo(const RaiSimTinyXmlWrapper &g, Vec<3> &pos);
+  static void getMjcfOrientation(const RaiSimTinyXmlWrapper &g, Mat<3, 3> &rot, const std::string& eulerseq, const std::string& anglerep);
+  static bool getColorFromMaterial(const std::unordered_map<std::string, RaiSimTinyXmlWrapper> &defaults,
+                                   const std::string &c,
+                                   std::string& color);
+
+ private:
+  static void processBody(Child &child,
+                          Mat<3, 3> &parentBodyRot,
+                          Vec<3> &parentBodyPos,
+                          const std::string &defaultName,
+                          bool isRoot,
+                          RaiSimTinyXmlWrapper &c,
+                          const std::unordered_map<std::string, RaiSimTinyXmlWrapper> &defaultDefaultNode,
+                          const std::unordered_map<std::string, std::pair<std::string, Vec<3>>>& meshAsset,
+                          const MjcfCompilerSetting& setting);
+};
+
 }
 
+} // namespace raisim
 #endif //RAISIM_LOADERS_HPP

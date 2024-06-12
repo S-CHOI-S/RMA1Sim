@@ -6,12 +6,10 @@
 
 int main(int argc, char* argv[]) {
   auto binaryPath = raisim::Path::setFromArgv(argv[0]);
-  raisim::World::setActivationKey(binaryPath.getDirectory() + "\\rsc\\activation.raisim");
 
   /// create raisim world
   raisim::World world;
-  world.setTimeStep(0.003);
-  world.setERP(world.getTimeStep(), world.getTimeStep());
+  world.setTimeStep(0.002);
 
   /// create objects
   raisim::TerrainProperties terrainProperties;
@@ -24,7 +22,9 @@ int main(int argc, char* argv[]) {
   terrainProperties.fractalOctaves = 3;
   terrainProperties.fractalLacunarity = 2.0;
   terrainProperties.fractalGain = 0.25;
-  auto hm = world.addHeightMap(0.0, 0.0, terrainProperties);
+  terrainProperties.heightOffset = -1;
+  raisim::HeightMap* hm = world.addHeightMap(0.0, 0.0, terrainProperties);
+  hm->setAppearance("red");
 
   std::vector<raisim::ArticulatedSystem*> anymals;
 
@@ -45,7 +45,7 @@ int main(int argc, char* argv[]) {
       anymals.push_back(world.addArticulatedSystem(
           binaryPath.getDirectory() + "\\rsc\\anymal\\urdf\\anymal.urdf"));
       anymals.back()->setGeneralizedCoordinate(
-          {double(2 * i), double(j), 2.5, 1.0, 0.0, 0.0, 0.0, 0.03, 0.4, -0.8,
+          {double(2 * i)-1, double(j), 2.5, 1.0, 0.0, 0.0, 0.0, 0.03, 0.4, -0.8,
            -0.03, 0.4, -0.8, 0.03, -0.4, 0.8, -0.03, -0.4, 0.8});
       anymals.back()->setGeneralizedForce(
           Eigen::VectorXd::Zero(anymals.back()->getDOF()));
@@ -56,17 +56,12 @@ int main(int argc, char* argv[]) {
     }
   }
 
-  std::default_random_engine generator;
-  std::normal_distribution<double> distribution(0.0, 0.2);
-  std::srand(std::time(nullptr));
-  anymals.back()->printOutBodyNamesInOrder();
-
-  /// launch raisim servear
+  /// launch raisim server
   raisim::RaisimServer server(&world);
   server.launchServer();
 
-  while (1) {
-    raisim::MSLEEP(2);
+  for (int i=0; i<1000000; i++) {
+    RS_TIMED_LOOP(int(world.getTimeStep()*1e6))
     server.integrateWorldThreadSafe();
   }
 

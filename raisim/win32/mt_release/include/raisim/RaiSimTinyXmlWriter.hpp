@@ -59,6 +59,11 @@ class RaiSimTinyXmlWriterElement {
     return *this;
   }
 
+  RaiSimTinyXmlWriterElement& setAttribute(const std::string &name, const char* attribute) {
+    ptr_->SetAttribute(name, attribute);
+    return *this;
+  }
+
   template<typename T>
   RaiSimTinyXmlWriterElement& setAttribute(const std::string &name, T attribute) {
     std::string list;
@@ -66,6 +71,17 @@ class RaiSimTinyXmlWriterElement {
       list += std::to_string(attribute[i]) + ", ";
     
     list += std::to_string(attribute[attribute.size()-1]);
+    ptr_->SetAttribute(name, list);
+    return *this;
+  }
+
+  template<typename T>
+  RaiSimTinyXmlWriterElement& setVectorAttribute(const std::string &name, T attribute, size_t size) {
+    std::string list;
+    for(int i=0; i<size-1; i++)
+      list += std::to_string(attribute[i]) + ", ";
+
+    list += std::to_string(attribute[size-1]);
     ptr_->SetAttribute(name, list);
     return *this;
   }

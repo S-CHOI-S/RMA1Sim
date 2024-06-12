@@ -6,51 +6,27 @@ RaiSim is a physics engine developed by RaiSim Tech Inc.
 It is designed to provide both the accuracy and speed for simulating robotic systems.
 However, it is a generic rigid-body simulator and can simulate any rigid body very efficiently.
 
-Why RaiSim?
+**Why RaiSim?**
 
-* The speed is benchmarked against other popular physics engine. (`[1] <https://github.com/leggedrobotics/SimBenchmark>`_)
-* The accuracy of RaiSim has been demonstrated in a number of papers (`[2] <https://robotics.sciencemag.org/content/4/26/eaau5872/tab-article-info>`_, `[3] <https://arxiv.org/pdf/1901.07517.pdf>`_)
+* The speed is benchmarked against other popular physics engines. (`[1] <https://github.com/leggedrobotics/SimBenchmark>`_)
+* The accuracy of RaiSim has been demonstrated in a number of papers (`[2] <https://robotics.sciencemag.org/content/4/26/eaau5872/tab-article-info>`_, `[3] <https://arxiv.org/pdf/1901.07517.pdf>`_, `[4] <https://robotics.sciencemag.org/content/5/47/eabc5986>`_,  `[5] <https://arxiv.org/abs/1909.08399>`_,  `[6] <https://arxiv.org/abs/2011.08811>`_)
 * Easiest C++ simulation library to learn/use
 * A minimum number of dependencies (only on STL and Eigen)
 
-Visualizer
-=====================
-There are two options available for visualization.
-
-- **raisimUnity**
-
-    * binaries included in the ``raisimUnity`` directory
-    * easy to use but less features
-    * runs as a seperate process
-    * works well in both windows and Linux (will be supported in Mac soon)
-    * source code available `here <https://github.com/raisimTech/raisimUnity>`_ under the MIT license. Written in C#
-
-- **raisimOgre**
-
-    * harder to use but rich in features
-    * works well in Linux. Should work in other two major OS's but not well tested
-    * easy to customize. Only C++ code
-    * source code available `here <https://github.com/raisimTech/raisimogre>`_ under the MIT license
-
-
 System Requirements
 =====================
-
 - **Linux**
-
-    * We recommend ubuntu 16.04, 18.04 and 20.04 but RaiSim might work on other distributions
+    * We recommend ubuntu 20.04 or higher but RaiSim might work on other distributions. Works only on a X86 CPU with an AVX2 instruction set (Intel Haswell or higher).
 
 - **Windows 10**
-
-    * Visual Studio 2019
+    * Visual Studio 2019 or higher. X86 CPU only.
 
 - **Mac**
-
-    * (WILL BE AVAILABLE SOON)The binaries also contain AVX2 instructions.
+    * Latest version. Requires the AVX2 instruction set. Works on both M1 (Apple ARM) and X86.
 
 Example code
 ===================
-Here is an example of an RaiSim application code.
+Here is an example of an RaiSim application code. You can visualize it using either raisimUnity or raisimUnreal.
 
 .. code-block:: c
 
@@ -58,7 +34,7 @@ Here is an example of an RaiSim application code.
   #include "raisim/RaisimServer.hpp"
 
   int main() {
-    raisim::World::setActivationKey(PATH_TO_THE_ACTIVATION_KEY);
+    raisim::World::setActivationKey("PATH_TO_THE_ACTIVATION_KEY");
     raisim::World world;
     auto anymal = world.addArticulatedSystem(PATH_TO_URDF);
     auto ball = world.addSphere(1, 1);
@@ -96,23 +72,3 @@ Here is a cmake file to compile above application code.
 A working version can be found here (RAISIM_EXAMPLE_).
 
 .. _RAISIM_EXAMPLE: https://github.com/raisimTech/raisimExample
-
-Included Software
-======================
-
-raisimUnity
----------------
-A visualizer for RaiSim.
-An executable is provided so you don't have to install anything.
-If you want to modify it, feel free to fork it at https://github.com/raisimTech/raisimUnity
-
-raisimOgre is not a recommended visualizer anymore because it is very tricky to make it work for both MATLAB and Python.
-However, if you prefer it, it still works and you can clone it at
-
-raisimPy
----------------
-A python wrapper for RaiSim. It was initially developed by Delhaisse, Brian and Rozo, Leonel (https://github.com/robotlearn/raisimpy)
-
-raisimMatlab
----------------
-A MATLAB wrapper for RaiSim. It is currently minimalistic. We also provide the source so that you can add a method that you need in the cpp file.

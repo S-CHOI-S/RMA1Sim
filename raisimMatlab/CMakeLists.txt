@@ -31,8 +31,7 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
 set(CMAKE_RUNPA)
 
 if(WIN32)
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_CURRENT_SOURCE_DIR}/../raisim/win32/mt_release/bin")
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_CURRENT_SOURCE_DIR}/../raisim/win32/mt_debug/bin")
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../raisim/win32/bin")
 endif()
 
 IF(Matlab_FOUND)
@@ -64,22 +63,26 @@ IF(Matlab_FOUND)
     if(LINUX)
         SET_TARGET_PROPERTIES(raisim PROPERTIES SUFFIX .mexa64 PREFIX "")
     endif(LINUX)
-    set_target_properties(raisim PROPERTIES LINK_FLAGS "-Wl,--no-as-needed,-rpath,${CMAKE_PREFIX_PATH}/lib")
+        set_target_properties(raisim PROPERTIES LINK_FLAGS "-Wl,--no-as-needed,-rpath,${CMAKE_PREFIX_PATH}/lib")
 
-    if(UNIX)
-        set_target_properties(raisim
-            PROPERTIES
-            ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../raisim/${RAISIM_OS}/lib"
-            LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../raisim/${RAISIM_OS}/lib"
-            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../raisim/${RAISIM_OS}/lib"
-            )
-    endif()
-        
     if (MSVC)
         set_target_properties(raisim
             PROPERTIES
             LINK_FLAGS "${_previous_link_flags} /EXPORT:mexFunction")
     endif()
+
+    if(UNIX)
+        set(INSTALL_SITE "${CMAKE_CURRENT_SOURCE_DIR}/../raisim/${RAISIM_OS}/lib")
+    else()
+        set(INSTALL_SITE "${CMAKE_CURRENT_SOURCE_DIR}/../raisim/${RAISIM_OS}/bin")
+    endif()
+
+    install(
+            TARGETS
+            raisim
+            DESTINATION
+            "${INSTALL_SITE}"
+    )
 
 ELSE(Matlab_FOUND)
     MESSAGE("MATLAB not found. RaiSim Matlab will not be built.")

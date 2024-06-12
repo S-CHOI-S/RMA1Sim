@@ -30,9 +30,8 @@
 #include "raisim/object/terrain/Ground.hpp"
 #include "raisim/object/terrain/HeightMap.hpp"
 
-#include "ode/collision.h"
-#include "ode/ode.h"
-#include "ode/extras/collision_kernel.h"
+#include "converter.hpp"  // contains code that allows to convert between the Vec, Mat to numpy arrays.
+
 // Important note: for the above include ("ode/src/collision_kernel.h"), you have to add a `extras` folder in the
 // `$LOCAL_BUILD/include/ode/` which should contain the following header files:
 // array.h, collision_kernel.h, common.h, error.h, objects.h, odeou.h, odetls.h, threading_base.h, and typedefs.h.
@@ -60,7 +59,7 @@ void init_terrain(py::module &m) {
     /***********/
     py::class_<raisim::TerrainProperties>(m, "TerrainProperties", "Raisim terrain properties")
         .def(py::init<>(), "Initialize the terrain properties")
-        .def(py::init<double, double, double, double, size_t, size_t, size_t, double, double, double, std::uint32_t>(),
+        .def(py::init<double, double, double, double, size_t, size_t, size_t, double, double, double, double, std::uint32_t>(),
         "Initialize the terrain properties.\n\n"
         "Args:\n"
         "    frequency (float): frequency.\n"
@@ -73,22 +72,24 @@ void init_terrain(py::module &m) {
         "    fractal_lacunarity (float): the lacunarity of fractals.\n"
         "    fractal_gain (float): fractal gain.\n"
         "    step_size (float): the step size.\n"
+        "    height_offset (float): the height offset.\n"
         "    seed (int): the random seed.",
         py::arg("frequency") = 0.1, py::arg("x_size") = 10., py::arg("y_size") = 10., py::arg("z_scale") = 2.,
         py::arg("x_samples") = 100, py::arg("y_samples") = 100, py::arg("fractal_octaves") = 5,
         py::arg("fractal_lacunarity") = 2., py::arg("fractal_gain") = 0.5, py::arg("step_size") = 0,
-        py::arg("seed") = std::default_random_engine::default_seed)
+        py::arg("height_offset") = 0, py::arg("seed") = std::default_random_engine::default_seed)
 
         .def_readwrite("frequency", &raisim::TerrainProperties::frequency)
-        .def_readwrite("x_size", &raisim::TerrainProperties::xSize)
-        .def_readwrite("y_size", &raisim::TerrainProperties::ySize)
-        .def_readwrite("z_scale", &raisim::TerrainProperties::zScale)
-        .def_readwrite("x_samples", &raisim::TerrainProperties::xSamples)
-        .def_readwrite("y_samples", &raisim::TerrainProperties::ySamples)
-        .def_readwrite("fractal_octaves", &raisim::TerrainProperties::fractalOctaves)
-        .def_readwrite("fractal_lacunarity", &raisim::TerrainProperties::fractalLacunarity)
-        .def_readwrite("fractal_gain", &raisim::TerrainProperties::fractalGain)
-        .def_readwrite("step_size", &raisim::TerrainProperties::stepSize)
+        .def_readwrite("xSize", &raisim::TerrainProperties::xSize)
+        .def_readwrite("ySize", &raisim::TerrainProperties::ySize)
+        .def_readwrite("zScale", &raisim::TerrainProperties::zScale)
+        .def_readwrite("xSamples", &raisim::TerrainProperties::xSamples)
+        .def_readwrite("ySamples", &raisim::TerrainProperties::ySamples)
+        .def_readwrite("fractalOctaves", &raisim::TerrainProperties::fractalOctaves)
+        .def_readwrite("fractalLacunarity", &raisim::TerrainProperties::fractalLacunarity)
+        .def_readwrite("fractalGain", &raisim::TerrainProperties::fractalGain)
+        .def_readwrite("stepSize", &raisim::TerrainProperties::stepSize)
+        .def_readwrite("heightOffset", &raisim::TerrainProperties::heightOffset)
         .def_readwrite("seed", &raisim::TerrainProperties::seed);
 
 
@@ -101,7 +102,7 @@ void init_terrain(py::module &m) {
 	    "Args:\n"
 	    "    height (float): height of the ground.",
 	    py::arg("height"))
-	    .def("get_height", &raisim::Ground::getHeight, R"mydelimiter(
+	    .def("getHeight", &raisim::Ground::getHeight, R"mydelimiter(
 	    Get the ground's height.
 
 	    Returns:
@@ -170,7 +171,7 @@ void init_terrain(py::module &m) {
 	    py::arg("x_samples"), py::arg("y_samples"), py::arg("x_scale"), py::arg("y_scale"), py::arg("x_center"),
 	    py::arg("y_center"))
 
-	    .def("get_height", &raisim::HeightMap::getHeight, R"mydelimiter(
+	    .def("getHeight", &raisim::HeightMap::getHeight, R"mydelimiter(
 	    Get the height at the given location.
 
 	    Args:
@@ -179,17 +180,20 @@ void init_terrain(py::module &m) {
 	    )mydelimiter",
 	    py::arg("x"), py::arg("y"))
 
-
-        .def("destroy_collision_bodies", &raisim::HeightMap::destroyCollisionBodies, R"mydelimiter(
-	    Destroy the collision bodies of the specified collision space.
+        .def("getNormal", [](raisim::HeightMap& self, double x, double y) {
+               Vec<3> normal;
+               self.getNormal(x, y, normal);
+               return convert_vec_to_np(normal);
+             }, R"mydelimiter(
+	    Get the normal at the given location.
 
 	    Args:
-            id_ (dSpaceID): collision space id.
+            x (float): x position.
+            y (float): y position.
 	    )mydelimiter",
-	    py::arg("id_"))
+        py::arg("x"), py::arg("y"))
 
-
-	    .def("get_x_samples", &raisim::HeightMap::getXSamples, R"mydelimiter(
+	    .def("getXSamples", &raisim::HeightMap::getXSamples, R"mydelimiter(
 	    Get the x samples.
 
 	    Returns:
@@ -197,7 +201,7 @@ void init_terrain(py::module &m) {
 	    )mydelimiter")
 
 
-	    .def("get_y_samples", &raisim::HeightMap::getYSamples, R"mydelimiter(
+	    .def("getYSamples", &raisim::HeightMap::getYSamples, R"mydelimiter(
 	    Get the y samples.
 
 	    Returns:
@@ -205,7 +209,7 @@ void init_terrain(py::module &m) {
 	    )mydelimiter")
 
 
-	    .def("get_x_size", &raisim::HeightMap::getXSize, R"mydelimiter(
+	    .def("getXSize", &raisim::HeightMap::getXSize, R"mydelimiter(
 	    Get the x size.
 
 	    Returns:
@@ -213,7 +217,7 @@ void init_terrain(py::module &m) {
 	    )mydelimiter")
 
 
-	    .def("get_y_size", &raisim::HeightMap::getYSize, R"mydelimiter(
+	    .def("getYSize", &raisim::HeightMap::getYSize, R"mydelimiter(
 	    Get the y size.
 
 	    Returns:
@@ -221,7 +225,7 @@ void init_terrain(py::module &m) {
 	    )mydelimiter")
 
 
-	    .def("get_x_center", &raisim::HeightMap::getCenterX, R"mydelimiter(
+	    .def("getCenterX", &raisim::HeightMap::getCenterX, R"mydelimiter(
 	    Get the x center.
 
 	    Returns:
@@ -229,7 +233,7 @@ void init_terrain(py::module &m) {
 	    )mydelimiter")
 
 
-	    .def("get_y_center", &raisim::HeightMap::getCenterY, R"mydelimiter(
+	    .def("getCenterY", &raisim::HeightMap::getCenterY, R"mydelimiter(
 	    Get the y center.
 
 	    Returns:
@@ -237,7 +241,7 @@ void init_terrain(py::module &m) {
 	    )mydelimiter")
 
 
-	    .def("get_height_vector", &raisim::HeightMap::getHeightVector, R"mydelimiter(
+	    .def("getHeightVector", &raisim::HeightMap::getHeightVector, R"mydelimiter(
 	    Get the height vector.
 
 	    Returns:

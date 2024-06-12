@@ -55,7 +55,7 @@ class CMakeBuild(build_ext):
             build_args += ['--', '/m']
         else:
             cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
-            build_args += ['--', '-j4']
+            build_args += ['--', '-j2']
 
         env = os.environ.copy()
         env['CXXFLAGS'] = '{} -DVERSION_INFO=\\"{}\\"'.format(env.get('CXXFLAGS', ''),
@@ -67,7 +67,7 @@ class CMakeBuild(build_ext):
 
 setup(
     name='raisim_gym_torch',
-    version='0.0.0',
+    version='1.1.7',
     author='Jemin Hwangbo',
     license="proprietary",
     packages=find_packages(),
@@ -75,7 +75,6 @@ setup(
     description='gym for raisim using torch.',
     long_description='',
     ext_modules=[CMakeExtension('_raisim_gym')],
-    install_requires=['ruamel.yaml', 'numpy', 'torch', 'tensorboard'],
     cmdclass=dict(build_ext=CMakeBuild),
     include_package_data=True,
     zip_safe=False,

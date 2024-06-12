@@ -6,7 +6,6 @@
 
 int main(int argc, char* argv[]) {
   auto binaryPath = raisim::Path::setFromArgv(argv[0]);
-  raisim::World::setActivationKey(binaryPath.getDirectory() + "\\rsc\\activation.raisim");
 
   /// create raisim world
   double dt = 0.003;
@@ -53,26 +52,28 @@ int main(int argc, char* argv[]) {
   std::srand(std::time(nullptr));
   anymals.back()->printOutBodyNamesInOrder();
 
-  /// launch raisim servear
+  /// launch raisim server
   raisim::RaisimServer server(&world);
   server.launchServer();
 
   /// throw balls
   int interval = 600;
-  int numBalls = 20;
+  int numBalls = 10;
   int j = 0;
 
   for (int i = 0;; i++) {
-    raisim::MSLEEP(dt * 1000);
-
+    RS_TIMED_LOOP(int(world.getTimeStep()*1e6))
+    server.lockVisualizationServerMutex();
     if (i % interval == 0 && j < numBalls) {
       auto* ball = world.addSphere(0.1, 1.0);
       ball->setPosition(0, -2, 0.8);
       ball->setVelocity(0, 10, 0, 0, 0, 0);
+      ball->setAppearance("red");
       j++;
     }
-
-    server.integrateWorldThreadSafe();
+    server.applyInteractionForce();
+    world.integrate();
+    server.unlockVisualizationServerMutex();
   }
 
   server.killServer();
