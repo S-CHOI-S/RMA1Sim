@@ -188,9 +188,19 @@ raisimGymTorch
 ├── build
 ├── CMakeLists.txt
 ├── data
-│   ├── a1_locomotion
 │   └── anymal_locomotion
 │       └── jump
+├── raisimGymTorch
+├── ...
+```
+
+```shell
+raisimGymTorch
+├── build
+├── CMakeLists.txt
+├── data
+│   └── anymal_locomotion
+│       └── anymal_mod3
 ├── raisimGymTorch
 ├── ...
 ```
