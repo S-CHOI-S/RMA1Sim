@@ -182,6 +182,19 @@ $ python viz_policy.py \
 > [!Tip]
 > If you want to download the pretrained data, please download the [RMA1Sim](https://drive.google.com/drive/folders/1mAwB3S2jnIrxw_yQOmWcerQ_lsq68K87?usp=sharing) file!
 
+Additionally, the data files should be placed as follows:
+```shell
+raisimGymTorch
+├── build
+├── CMakeLists.txt
+├── data
+│   ├── a1_locomotion
+│   └── anymal_locomotion
+│       └── jump
+├── raisimGymTorch
+├── ...
+```
+
 </br>
 
 ## Results
