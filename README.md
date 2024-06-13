@@ -208,6 +208,14 @@ raisimGymTorch
 </br>
 
 ## Results
+### 1. RMA (Rapid Motor Adaptation)
+> [!Note]
+> You can directly execute the results using the ['RMA' tag](https://github.com/S-CHOI-S/RMA1Sim/tree/RMA).
+
+- __Random ENV1:__ Rough Terrain  
+- __Random ENV2:__ Stairs
+
+<img src="https://github.com/S-CHOI-S/RMA1Sim/assets/113012648/6851358e-9434-492f-b106-bcacf3fcda13"/>
 
 ## Discussion
 
