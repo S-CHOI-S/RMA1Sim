@@ -72,7 +72,7 @@
   - __Enhanced Exploration__  
     DIAYN encourages the agent to try diverse behaviors, thereby enhancing exploration. This increases adaptability in new environments and ensures efficient performance in a variety of situations.
 
-  <img src="https://github.com/S-CHOI-S/RMA1Sim/assets/113012648/f73fcf77-1044-4134-a459-66bbbc531596" width="80%"/>
+  <img src="https://github.com/S-CHOI-S/RMA1Sim/assets/113012648/011c342b-8068-411e-b8d7-982d06a28793" width="80%"/>
 
 ### 4. Jumping in Discontinuous Terrain
 > __Jumping in discontinuous terrain__ significantly enhances the mobility and adaptability of quadruped robots, enabling efficient and safe operation in various missions.
@@ -215,7 +215,13 @@ raisimGymTorch
 - __Random ENV1:__ Rough Terrain  
 - __Random ENV2:__ Stairs
 
-<img src="https://github.com/S-CHOI-S/RMA1Sim/assets/113012648/6851358e-9434-492f-b106-bcacf3fcda13"/>
+  <img src="https://github.com/S-CHOI-S/RMA1Sim/assets/113012648/6851358e-9434-492f-b106-bcacf3fcda13" width="60%"/>
+
+### 2. Multi-directional policy
+> [!Note]
+> You can directly execute the results using the ['multi_direction' tag](https://github.com/S-CHOI-S/RMA1Sim/tree/multi_direction).
+
+- 
 
 ## Discussion
 
