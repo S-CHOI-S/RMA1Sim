@@ -221,6 +221,24 @@ raisimGymTorch
 > [!Note]
 > You can directly execute the results using the ['multi_direction' tag](https://github.com/S-CHOI-S/RMA1Sim/tree/multi_direction).
 
+> Red line means __target trajectory__ and blue line means __robot trajectory__.
+
+- The graph below shows the target direction values from left to right as __-π/2, -π/4, 0, π/4, and π/2__, respectively.
+
+  <img src="https://github.com/S-CHOI-S/RMA1Sim/assets/113012648/63db6a47-4f31-43a5-b2f5-c95e3c5377f6"/>
+  &rarr; The error value increases as the robot moves.
+
+- Enables the robot to change movements based on user commands.
+  
+  (Experiment with half-circle movements to test direction changes).
+
+  <div style="display: flex; justify-content: space-around;">
+  <img src="https://github.com/S-CHOI-S/RMA1Sim/assets/113012648/46b41040-4e79-4517-90ef-6e6d1fe10613" width="45%" />
+  <img src="https://github.com/S-CHOI-S/RMA1Sim/assets/113012648/17074475-1864-4c3e-aed7-d6c4b24af527" width="46%" />
+</div>
+
+  &rarr; The graph shows the significant errors. To reduce the steady state error, the robot needs to know its own movements!
+
 - 
 
 ## Discussion
@@ -245,9 +263,9 @@ raisimGymTorch
     ✔️ _Joint Movement & Stable Landing_  
     $$reward_{landing}\ +=\ exp \left(-3 \left( \sqrt{\sum w_{joint}^2} + \sqrt{\sum (\theta_{joint} - \theta_{joint_{init}})^2 }\ \right) \right)$$
 
-- Why do you think errors compounded in the Direction Changing Policy?
-- What methods did you use to input the control commands?
-- An integral action is needed in the reward function to eliminate offset errors.
+- __Why do you think errors compounded in the Direction Changing Policy?__
+- __What methods did you use to input the control commands?__
+- __An integral action is needed in the reward function to eliminate offset errors.__
 
 
 ### Reference
