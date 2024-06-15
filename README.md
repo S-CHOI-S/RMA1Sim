@@ -245,10 +245,11 @@ raisimGymTorch
   
   ❗ Reduction in errors compared to previous methods observed!
 
+  <img src="https://github.com/S-CHOI-S/RMA1Sim/assets/113012648/bb324a02-16a5-452c-ae0d-ccda8e84b3f5" width="80%"/>
+  
   ❗ __Application:__ Robot moves to avoid cylindrical shapes, demonstrating practical use of learned policies.
 
-
-
+</br>
 
 ## Discussion
 
