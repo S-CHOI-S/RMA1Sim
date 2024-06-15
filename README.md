@@ -212,8 +212,8 @@ raisimGymTorch
 > [!Note]
 > You can directly execute the results using the ['RMA' tag](https://github.com/S-CHOI-S/RMA1Sim/tree/RMA).
 
-- __Random ENV1:__ Rough Terrain  
-- __Random ENV2:__ Stairs
+- __Random Env1:__ Rough Terrain  
+- __Random Env2:__ Stairs
 
   <img src="https://github.com/S-CHOI-S/RMA1Sim/assets/113012648/6851358e-9434-492f-b106-bcacf3fcda13" width="60%"/>
 
@@ -223,7 +223,7 @@ raisimGymTorch
 
 > Red line means __target trajectory__ and blue line means __robot trajectory__.
 
-- __The graph below shows the target direction values from left to right as __-π/2, -π/4, 0, π/4, and π/2__, respectively.__
+- __The graph below shows the target direction values from left to right as _-π/2, -π/4, 0, π/4, and π/2_, respectively.__
 
   <img src="https://github.com/S-CHOI-S/RMA1Sim/assets/113012648/63db6a47-4f31-43a5-b2f5-c95e3c5377f6"/>
   ❗ The error value increases as the robot moves.
@@ -245,9 +245,24 @@ raisimGymTorch
   
   ❗ Reduction in errors compared to previous methods observed!
 
-  <img src="https://github.com/S-CHOI-S/RMA1Sim/assets/113012648/bb324a02-16a5-452c-ae0d-ccda8e84b3f5" width="80%"/>
+  <img src="https://github.com/S-CHOI-S/RMA1Sim/assets/113012648/bb324a02-16a5-452c-ae0d-ccda8e84b3f5" width="60%"/>
   
   ❗ __Application:__ Robot moves to avoid cylindrical shapes, demonstrating practical use of learned policies.
+
+### 3. Jumping Policy
+> [!Note]
+> You can directly execute the results using the ['jump' tag](https://github.com/S-CHOI-S/RMA1Sim/tree/jump).
+
+- Design an environment where the difficulty level gradually increases from a low starting point during the learning process.
+
+- Set an appropriate rate of difficulty increase that aligns with the learning rate.
+  
+  (The target box height was set to $h$, and training was conducted by __gradually increasing the box height from $0.01h$ to $h$__).
+
+ <img src="https://github.com/S-CHOI-S/RMA1Sim/assets/113012648/0e6c3e53-5d9d-4187-9c57-df4c0f60fedc"/>
+
+ <img src="https://github.com/S-CHOI-S/RMA1Sim/assets/113012648/52f70213-af3f-4334-9a73-fb18c3a3aeed"/>
+
 
 </br>
 
