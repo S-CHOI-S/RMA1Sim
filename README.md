@@ -233,10 +233,9 @@ raisimGymTorch
   (Experiment with half-circle movements to test direction changes).
 
   <div style="display: flex; justify-content: space-around;">
-  <img src="https://github.com/S-CHOI-S/RMA1Sim/assets/113012648/46b41040-4e79-4517-90ef-6e6d1fe10613" width="45%" />
-  <img src="https://github.com/S-CHOI-S/RMA1Sim/assets/113012648/17074475-1864-4c3e-aed7-d6c4b24af527" width="46%" />
-</div>
-
+    <img src="https://github.com/S-CHOI-S/RMA1Sim/assets/113012648/46b41040-4e79-4517-90ef-6e6d1fe10613" width="45%" />
+    <img src="https://github.com/S-CHOI-S/RMA1Sim/assets/113012648/17074475-1864-4c3e-aed7-d6c4b24af527" width="46%" />
+  </div>
   ❗ The graph shows the significant errors. To reduce the steady state error, the robot needs to know its own movements!
 
 - __Improvements__  
@@ -257,19 +256,26 @@ raisimGymTorch
 - __How did you modulate the reward function, particularly after jumping to landing?__  
   To design the motion for jumping to the desired location, we divided the process into three stages: the takeoff phase, the aerial phase, and the landing phase, as different actions are required for each state.
   - __Takeoff Phase:__  
-    The primary goal is to execute the jump rather than to move closer to the target location. Therefore, we designed a reward function specifically for the jumping action.  
+    The primary goal is to execute the jump rather than to move closer to the target location. Therefore, we designed a reward function specifically for the jumping action.
+    
     ✔️ _Jump Velocity_  
     $$reward_{jump}\ +=\ exp(-5(v_y-v_{y, ref})^2+(v_z-v_{z,ref})^2)$$
+    
     ✔️ _Keep Body Direction_
     $$reward_{jump}\ +=\ exp \left(-4 \left|\frac {\overrightarrow v_{global}}{\left|\overrightarrow v_{global} \right|} - \frac {\overrightarrow v_{local}}{\left|\overrightarrow v_{local} \right|} \right|\right)$$
+    
     ✔️ _Keep Body Twisting_
     $$reward_{jump}\ +=\ exp(-|w_x|-10|w_z|)$$
+    
   - __Aerial Phase:__  
-    During the aerial phase, we added a reward component based on the distance to the target location. This adjustment helps the system to refine the jump direction towards the target as learning progresses.  
+    During the aerial phase, we added a reward component based on the distance to the target location. This adjustment helps the system to refine the jump direction towards the target as learning progresses.
+    
     ✔️ _Jump Direction_  
     $$reward_{position}\ +=\ exp(-3 \sqrt{(x-x_{goal})^2+(y-y_{goal})^2}\ )$$
+    
   - __Landing Phase:__  
-    Finally, in the landing phase, we introduced a reward function that includes terms for limiting joint movements and returning to previous joint angles. This approach helps the system learn stable landing motions.  
+    Finally, in the landing phase, we introduced a reward function that includes terms for limiting joint movements and returning to previous joint angles. This approach helps the system learn stable landing motions.
+    
     ✔️ _Joint Movement & Stable Landing_  
     $$reward_{landing}\ +=\ exp \left(-3 \left( \sqrt{\sum w_{joint}^2} + \sqrt{\sum (\theta_{joint} - \theta_{joint_{init}})^2 }\ \right) \right)$$
 
