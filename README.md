@@ -226,7 +226,7 @@ raisimGymTorch
 - The graph below shows the target direction values from left to right as __-π/2, -π/4, 0, π/4, and π/2__, respectively.
 
   <img src="https://github.com/S-CHOI-S/RMA1Sim/assets/113012648/63db6a47-4f31-43a5-b2f5-c95e3c5377f6"/>
-  &rarr; The error value increases as the robot moves.
+  ❗ The error value increases as the robot moves.
 
 - Enables the robot to change movements based on user commands.
   
@@ -237,9 +237,18 @@ raisimGymTorch
   <img src="https://github.com/S-CHOI-S/RMA1Sim/assets/113012648/17074475-1864-4c3e-aed7-d6c4b24af527" width="46%" />
 </div>
 
-  &rarr; The graph shows the significant errors. To reduce the steady state error, the robot needs to know its own movements!
+  ❗ The graph shows the significant errors. To reduce the steady state error, the robot needs to know its own movements!
 
-- 
+- Improvements  
+  Additional observation of the angle difference between the current direction and the intended direction for better learning.
+
+  <img src="https://github.com/S-CHOI-S/RMA1Sim/assets/113012648/d3431ec4-bd6b-47c5-86de-3bdc0fe25e53"/>
+  ❗ Reduction in errors compared to previous methods observed!
+
+  ❗ __Application:__ Robot moves to avoid cylindrical shapes, demonstrating practical use of learned policies.
+
+
+
 
 ## Discussion
 
