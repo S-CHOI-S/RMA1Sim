@@ -243,6 +243,7 @@ raisimGymTorch
   Additional observation of the angle difference between the current direction and the intended direction for better learning.
 
   <img src="https://github.com/S-CHOI-S/RMA1Sim/assets/113012648/d3431ec4-bd6b-47c5-86de-3bdc0fe25e53" width="90%"/>
+  
   ❗ Reduction in errors compared to previous methods observed!
 
   ❗ __Application:__ Robot moves to avoid cylindrical shapes, demonstrating practical use of learned policies.
