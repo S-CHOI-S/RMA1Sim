@@ -259,10 +259,12 @@ raisimGymTorch
   
   (The target box height was set to $h$, and training was conducted by __gradually increasing the box height from $0.01h$ to $h$__).
 
- <img src="https://github.com/S-CHOI-S/RMA1Sim/assets/113012648/0e6c3e53-5d9d-4187-9c57-df4c0f60fedc"/>
-
- <img src="https://github.com/S-CHOI-S/RMA1Sim/assets/113012648/52f70213-af3f-4334-9a73-fb18c3a3aeed"/>
-
+<div style="display: flex; justify-content: space-around;">
+  <img src="https://github.com/S-CHOI-S/RMA1Sim/assets/113012648/6058ec28-8356-473c-8907-71c455fcca9e" width="24%"/>
+  <img src="https://github.com/S-CHOI-S/RMA1Sim/assets/113012648/e88fef04-d9e7-454b-b743-275dd0228b99" width="24%"/>
+  <img src="https://github.com/S-CHOI-S/RMA1Sim/assets/113012648/3e53c0bd-8912-4c5b-b329-e725ce835409" width="24%"/>
+  <img src="https://github.com/S-CHOI-S/RMA1Sim/assets/113012648/4b220068-5743-43bf-a266-7373e80daf1b" width="24%"/>
+</div>
 
 </br>
 
