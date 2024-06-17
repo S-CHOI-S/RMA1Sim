@@ -114,7 +114,7 @@ $ sudo apt install libeigen3-dev cmake
 __Essential 2.__ RaiSim
 > RaiSim is the physics engine developed by RaiSim Tech Inc.: [raisimTech/raisimLib](https://github.com/raisimTech/raisimLib.git)
 ```shell
-$ git clone https://github.com/S-CHOI-S/RaiSim-RL.git
+$ git clone https://github.com/S-CHOI-S/RMA1Sim.git RaisimLib
 ```
 > [!note]
 > After cloned the RaiSim repository, you should follow the instructions on [installation page](https://raisim.com/sections/Installation.html)
@@ -258,13 +258,21 @@ raisimGymTorch
 - Set an appropriate rate of difficulty increase that aligns with the learning rate.
   
   (The target box height was set to $h$, and training was conducted by __gradually increasing the box height from $0.01h$ to $h$__).
+  > The videos below, from top left to bottom right, correspond to __epochs 400, 1000, and 1800__ respectively.  
+  > The final graph represents __the return values at each epoch__.
 
-<div style="display: flex; justify-content: space-around;">
-  <img src="https://github.com/S-CHOI-S/RMA1Sim/assets/113012648/6058ec28-8356-473c-8907-71c455fcca9e" width="24%"/>
-  <img src="https://github.com/S-CHOI-S/RMA1Sim/assets/113012648/e88fef04-d9e7-454b-b743-275dd0228b99" width="24%"/>
-  <img src="https://github.com/S-CHOI-S/RMA1Sim/assets/113012648/3e53c0bd-8912-4c5b-b329-e725ce835409" width="24%"/>
-  <img src="https://github.com/S-CHOI-S/RMA1Sim/assets/113012648/4b220068-5743-43bf-a266-7373e80daf1b" width="24%"/>
-</div>
+  <div style="display: flex; justify-content: space-around;">
+    <img src="https://github.com/S-CHOI-S/RMA1Sim/assets/113012648/6058ec28-8356-473c-8907-71c455fcca9e" width="48%"/>
+    <img src="https://github.com/S-CHOI-S/RMA1Sim/assets/113012648/e88fef04-d9e7-454b-b743-275dd0228b99" width="48%"/>
+  </div>
+  <div style="display: flex; justify-content: space-around;">
+    <img src="https://github.com/S-CHOI-S/RMA1Sim/assets/113012648/3e53c0bd-8912-4c5b-b329-e725ce835409" width="48%"/>
+    <img src="https://github.com/S-CHOI-S/RMA1Sim/assets/113012648/4b220068-5743-43bf-a266-7373e80daf1b" width="48%"/>
+  </div>
+
+  ❗ Target point (box height) gradually increases as learning progresses!
+  
+  ❗ As the training progresses, it can be observed that the robot reliably reaches the desired position through jumping.
 
 </br>
 
