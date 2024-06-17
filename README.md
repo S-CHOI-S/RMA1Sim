@@ -114,7 +114,7 @@ $ sudo apt install libeigen3-dev cmake
 __Essential 2.__ RaiSim
 > RaiSim is the physics engine developed by RaiSim Tech Inc.: [raisimTech/raisimLib](https://github.com/raisimTech/raisimLib.git)
 ```shell
-$ git clone https://github.com/S-CHOI-S/RMA1Sim.git RaisimLib
+$ git clone https://github.com/S-CHOI-S/RMA1Sim.git raisimLib
 ```
 > [!note]
 > After cloned the RaiSim repository, you should follow the instructions on [installation page](https://raisim.com/sections/Installation.html)
