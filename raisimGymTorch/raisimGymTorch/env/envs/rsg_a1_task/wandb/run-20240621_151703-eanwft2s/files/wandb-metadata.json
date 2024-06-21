@@ -1,0 +1,215 @@
+{
+    "os": "Linux-5.15.0-107-generic-x86_64-with-glibc2.17",
+    "python": "3.8.19",
+    "heartbeatAt": "2024-06-21T06:17:04.560426",
+    "startedAt": "2024-06-21T06:17:03.667034",
+    "docker": null,
+    "cuda": null,
+    "args": [
+        "--name",
+        "random",
+        "--gpu",
+        "0",
+        "--exptid",
+        "240621151655"
+    ],
+    "state": "running",
+    "program": "runner.py",
+    "codePathLocal": "runner.py",
+    "codePath": "raisimGymTorch/raisimGymTorch/env/envs/rsg_a1_task/runner.py",
+    "git": {
+        "remote": "https://github.com/S-CHOI-S/RMA1Sim.git",
+        "commit": "f347cf5a1c57ad12ac02747cfe2653bafe7cdabd"
+    },
+    "email": "jennychoi0904@gmail.com",
+    "root": "/home/kist/raisim_ws/raisimLib",
+    "host": "kist-sol",
+    "username": "kist",
+    "executable": "/home/kist/anaconda3/envs/raisim/bin/python",
+    "cpu_count": 16,
+    "cpu_count_logical": 32,
+    "cpu_freq": {
+        "current": 3005.28534375,
+        "min": 3000.0,
+        "max": 4500.0
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 3000.0,
+            "min": 3000.0,
+            "max": 4500.0
+        },
+        {
+            "current": 3000.0,
+            "min": 3000.0,
+            "max": 4500.0
+        },
+        {
+            "current": 3000.0,
+            "min": 3000.0,
+            "max": 4500.0
+        },
+        {
+            "current": 3000.0,
+            "min": 3000.0,
+            "max": 4500.0
+        },
+        {
+            "current": 3000.0,
+            "min": 3000.0,
+            "max": 4500.0
+        },
+        {
+            "current": 3000.0,
+            "min": 3000.0,
+            "max": 4500.0
+        },
+        {
+            "current": 3169.131,
+            "min": 3000.0,
+            "max": 4500.0
+        },
+        {
+            "current": 3000.0,
+            "min": 3000.0,
+            "max": 4500.0
+        },
+        {
+            "current": 3000.0,
+            "min": 3000.0,
+            "max": 4500.0
+        },
+        {
+            "current": 3000.0,
+            "min": 3000.0,
+            "max": 4500.0
+        },
+        {
+            "current": 3000.0,
+            "min": 3000.0,
+            "max": 4500.0
+        },
+        {
+            "current": 3000.0,
+            "min": 3000.0,
+            "max": 4500.0
+        },
+        {
+            "current": 3000.0,
+            "min": 3000.0,
+            "max": 4500.0
+        },
+        {
+            "current": 3000.0,
+            "min": 3000.0,
+            "max": 4500.0
+        },
+        {
+            "current": 3000.0,
+            "min": 3000.0,
+            "max": 4500.0
+        },
+        {
+            "current": 3000.0,
+            "min": 3000.0,
+            "max": 4500.0
+        },
+        {
+            "current": 3000.0,
+            "min": 3000.0,
+            "max": 4500.0
+        },
+        {
+            "current": 3000.0,
+            "min": 3000.0,
+            "max": 4500.0
+        },
+        {
+            "current": 3000.0,
+            "min": 3000.0,
+            "max": 4500.0
+        },
+        {
+            "current": 3000.0,
+            "min": 3000.0,
+            "max": 4500.0
+        },
+        {
+            "current": 3000.0,
+            "min": 3000.0,
+            "max": 4500.0
+        },
+        {
+            "current": 3000.0,
+            "min": 3000.0,
+            "max": 4500.0
+        },
+        {
+            "current": 3000.0,
+            "min": 3000.0,
+            "max": 4500.0
+        },
+        {
+            "current": 3000.0,
+            "min": 3000.0,
+            "max": 4500.0
+        },
+        {
+            "current": 3000.0,
+            "min": 3000.0,
+            "max": 4500.0
+        },
+        {
+            "current": 3000.0,
+            "min": 3000.0,
+            "max": 4500.0
+        },
+        {
+            "current": 3000.0,
+            "min": 3000.0,
+            "max": 4500.0
+        },
+        {
+            "current": 3000.0,
+            "min": 3000.0,
+            "max": 4500.0
+        },
+        {
+            "current": 3000.0,
+            "min": 3000.0,
+            "max": 4500.0
+        },
+        {
+            "current": 3000.0,
+            "min": 3000.0,
+            "max": 4500.0
+        },
+        {
+            "current": 3000.0,
+            "min": 3000.0,
+            "max": 4500.0
+        },
+        {
+            "current": 3000.0,
+            "min": 3000.0,
+            "max": 4500.0
+        }
+    ],
+    "disk": {
+        "/": {
+            "total": 915.3232879638672,
+            "used": 565.1586074829102
+        }
+    },
+    "gpu": "NVIDIA GeForce RTX 4070 Ti",
+    "gpu_count": 1,
+    "gpu_devices": [
+        {
+            "name": "NVIDIA GeForce RTX 4070 Ti",
+            "memory_total": 12878610432
+        }
+    ],
+    "memory": {
+        "total": 30.490524291992188
+    }
+}
