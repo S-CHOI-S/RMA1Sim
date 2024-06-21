@@ -18,29 +18,19 @@ class Compound : public SingleBodyObject {
  public:
 
   struct CompoundObjectChild {
-    std::string childCompound; // not used currently
     ObjectType objectType;
     Vec<4> objectParam;
     std::string material;
-    std::string appearance;
     Transformation trans;
   };
 
   Compound(const std::vector<CompoundObjectChild>& list, double mass, const Vec<3>& COM, const Mat<3,3>& inertia);
 
-  /**
-   * returns the children of the compound
-   * @return the children of the compound */
   const std::vector<CompoundObjectChild>& getObjList () { return list_; };
 
-  /**
-   * returns the collision list of the compound
-   * @return the collision list of the compound */
   const std::vector<dGeomID>& getCollisionObjectList () { return co; };
 
-  void setBodyType(BodyType type) final;
-
-  void destroyCollisionBodies(dSpaceID id) final;
+  virtual void destroyCollisionBodies(dSpaceID id) final;
 
  protected:
 

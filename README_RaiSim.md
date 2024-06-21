@@ -1,6 +1,6 @@
 # RAISIM, A PHYSICS ENGINE FOR ROBOTICS AND AI RESEARCH
 
-Documentation available at the [RaiSim Tech website](http://raisim.com)!
+Documentation available at the [RaiSim Tech website](http://raisim.com).
 
 ## License
 

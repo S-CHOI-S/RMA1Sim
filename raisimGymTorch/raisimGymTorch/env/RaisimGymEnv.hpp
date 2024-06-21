@@ -9,26 +9,36 @@
 #include <vector>
 #include <memory>
 #include <unordered_map>
-#include "Common.hpp"
+#include <Eigen/Core>
 #include "raisim/World.hpp"
 #include "raisim/RaisimServer.hpp"
 #include "Yaml.hpp"
-#include "Reward.hpp"
+
+#define __RSG_MAKE_STR(x) #x
+#define _RSG_MAKE_STR(x) __RSG_MAKE_STR(x)
+#define RSG_MAKE_STR(x) _RSG_MAKE_STR(x)
+
+#define READ_YAML(a, b, c) RSFATAL_IF(!&c, "Node "<<RSG_MAKE_STR(c)<<" doesn't exist") b = c.template As<a>();
 
 namespace raisim {
 
+using Dtype=float;
+using EigenRowMajorMat=Eigen::Matrix<Dtype, -1, -1, Eigen::RowMajor>;
+using EigenVec=Eigen::Matrix<Dtype, -1, 1>;
+using EigenBoolVec=Eigen::Matrix<bool, -1, 1>;
 
 class RaisimGymEnv {
 
  public:
-  explicit RaisimGymEnv (std::string resourceDir, const Yaml::Node& cfg) :
-      resourceDir_(std::move(resourceDir)), cfg_(cfg) { }
+  explicit RaisimGymEnv (std::string resourceDir, const Yaml::Node& cfg) : resourceDir_(std::move(resourceDir)), cfg_(cfg) {
+    world_ = std::make_unique<raisim::World>();
+  }
 
-  virtual ~RaisimGymEnv() { if(server_) server_->killServer(); };
+  virtual ~RaisimGymEnv() { close(); };
 
   /////// implement these methods /////////
   virtual void init() = 0;
-  virtual void reset() = 0;
+  virtual void reset(bool resample_target_speed) = 0;
   virtual void observe(Eigen::Ref<EigenVec> ob) = 0;
   virtual float step(const Eigen::Ref<EigenVec>& action) = 0;
   virtual bool isTerminalState(float& terminalReward) = 0;
@@ -36,11 +46,12 @@ class RaisimGymEnv {
 
   /////// optional methods ///////
   virtual void curriculumUpdate() {};
-  virtual void close() {};
+  virtual void close() { if(server_) server_->killServer(); };
   virtual void setSeed(int seed) {};
   ////////////////////////////////
 
   void setSimulationTimeStep(double dt) { simulation_dt_ = dt; world_->setTimeStep(dt); }
+  void setItrNumber(int number) { itr_number = number;}
   void setControlTimeStep(double dt) { control_dt_ = dt; }
   int getObDim() { return obDim_; }
   int getActionDim() { return actionDim_; }
@@ -51,7 +62,6 @@ class RaisimGymEnv {
   void turnOnVisualization() { server_->wakeup(); }
   void startRecordingVideo(const std::string& videoName ) { server_->startRecordingVideo(videoName); }
   void stopRecordingVideo() { server_->stopRecordingVideo(); }
-  raisim::Reward& getRewards() { return rewards_; }
 
  protected:
   std::unique_ptr<raisim::World> world_;
@@ -60,9 +70,10 @@ class RaisimGymEnv {
   std::string resourceDir_;
   Yaml::Node cfg_;
   int obDim_=0, actionDim_=0;
+  int itr_number = 0;
   std::unique_ptr<raisim::RaisimServer> server_;
-  raisim::Reward rewards_;
 };
+
 }
 
 #endif //SRC_RAISIMGYMENV_HPP

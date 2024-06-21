@@ -26,31 +26,16 @@ void fatalIf(bool fatal, const std::string& msg) {
 }
 
 #define CHECK_IF_STRING(X, Y) \
-if (!(nrhs>X)) mexErrMsgTxt((std::to_string(X) + "th argument is missing").c_str()); \
-if (!mxIsChar(prhs[X])) mexErrMsgTxt((std::to_string(X) + std::string(Y)).c_str());
-
-#define CHECK_IF_DOUBLE(X, Y) \
-if (!(nrhs>X)) mexErrMsgTxt((std::to_string(X) + "th argument is missing").c_str()); \
-if (!mxIsDouble(prhs[X])) mexErrMsgTxt((std::to_string(X) + std::string(Y)).c_str());
+if (!mxIsChar(prhs[X])) mexErrMsgTxt(Y);
 
 #define CHECK_CMD CHECK_IF_STRING(0, "The first argument is the type of command and must be a string")
 
 #define GET_STRING(X, Y) \
-    CHECK_IF_STRING(X, " th argument must be a string") \
+    CHECK_IF_STRING(X, "%d th argument must be a string") \
     char Y##Char[256]; \
     if (mxGetString(prhs[X], Y##Char, sizeof(Y##Char)) >256) \
       mexErrMsgTxt("First input should be a command string less than 256 characters long."); \
     std::string Y(Y##Char);
-
-#define GET_DOUBLE(X, Y) \
-    CHECK_IF_DOUBLE(X, " th argument must be a double") \
-    double Y = mxGetScalar(prhs[X]);                                           \
-
-#define GET_COLOR(X, RED, GREEN, BLUE, ALPHA) \
-  GET_DOUBLE(X, RED)                          \
-  GET_DOUBLE(X + 1, GREEN)                    \
-  GET_DOUBLE(X + 2, BLUE)                     \
-  GET_DOUBLE(X + 3, ALPHA)
 
 #define GETOBJ                                                              \
   CHECK_IF_STRING(1, "The second argument must be the name of the object"); \
@@ -68,16 +53,17 @@ std::unique_ptr<raisim::World> world_;
 std::unique_ptr<raisim::RaisimServer> server_;
 
 void quit() {
-  if (server_) server_->killServer();
-  world_.reset(nullptr);
-  server_.reset(nullptr);
-  initialized = false;
-  mexUnlock();
+  if (initialized) {
+    server_->killServer();
+    world_.reset(nullptr);
+    server_.reset(nullptr);
+    initialized = false;
+  };
 }
 
-#define CHECK_INPUT_SIZE(X) if(nrhs != X) printf("Expecting %d inputs. Received %d inputs", X, nrhs);
+#define CHECK_INPUT_SIZE(X) if(nrhs != X) mexErrMsgTxt("Expecting X inputs");
 
-#define CHECK_OUTPUT_SIZE(X) if(nlhs != X) printf("Expecting %d outputs. Received %d outputs", X, nlhs);
+#define CHECK_OUTPUT_SIZE(X) if(nlhs != X) mexErrMsgTxt("Expecting X outputs");
 
 // number of arguments, check names, etc
 #define ADD_CHECK(X) \
@@ -116,14 +102,7 @@ void quit() {
   const mwSize* dim = mxGetDimensions(prhs[POSITION]);          \
   if (!mxIsDouble(prhs[POSITION])) mexErrMsgTxt((std::to_string(POSITION) + "th argument is not double array").c_str()); \
   if (std::max(dim[0], dim[1])!=SIZE) mexErrMsgTxt((std::to_string(POSITION) + "th argument should be " + std::to_string(SIZE) + " long. "+std::to_string(std::max(dim[0], dim[1])) +" given.").c_str()); \
-  Eigen::Map<Eigen::Matrix<double, -1, 1>> vec(mxGetPr(prhs[POSITION]), std::max(dim[0], dim[1]), 1);\
-
-#define GET_EIGEN_VEC_WITH_CHECK_AND_NAME(POSITION, SIZE, NAME) \
-  if (!(nrhs>POSITION)) mexErrMsgTxt((std::to_string(POSITION) + "th argument is missing").c_str()); \
-  const mwSize* dim = mxGetDimensions(prhs[POSITION]);          \
-  if (!mxIsDouble(prhs[POSITION])) mexErrMsgTxt((std::to_string(POSITION) + "th argument is not double array").c_str()); \
-  if (std::max(dim[0], dim[1])!=SIZE) mexErrMsgTxt((std::to_string(POSITION) + "th argument should be " + std::to_string(SIZE) + " long. "+std::to_string(std::max(dim[0], dim[1])) +" given.").c_str()); \
-  Eigen::Map<Eigen::Matrix<double, -1, 1>> NAME(mxGetPr(prhs[POSITION]), std::max(dim[0], dim[1]), 1);\
+  Eigen::Map<Eigen::Matrix<double, -1, 1>> vec(mxGetPr(prhs[POSITION]), std::max(dim[0], dim[1]), 1);    \
 
 #define GET_EIGEN_VEC(POSITION) \
   if (!(nrhs>POSITION)) mexErrMsgTxt((std::to_string(POSITION) + "th argument is missing").c_str()); \
@@ -137,12 +116,6 @@ void quit() {
     GET_AS                                                                     \
     as->X(vec);                                                              \
   }
-
-#define RETURN_VEC(RETURN) \
-    plhs[0] = mxCreateDoubleMatrix(RETURN.rows(), RETURN.cols(), mxREAL); \
-    memcpy(mxGetPr(plhs[0]), RETURN.ptr(),                                \
-           sizeof(double) * RETURN.rows() * RETURN.cols());               \
-    return;
 
 #define GETTER(X)                                                     \
   else if (!strcmp(MAKE_STR(X), cmd)) {                               \
@@ -198,9 +171,8 @@ void quit() {
   }
 
 void mexFunction(
-  int nlhs, mxArray* plhs[], int nrhs,
-  const mxArray* prhs[]) {
-
+    int nlhs, mxArray* plhs[], int nrhs,
+    const mxArray* prhs[]) {
   // nlhs   number of expected outputs
   // plhs   array to be populated by outputs (DATA BACK TO MATLAB)
   // nrhs   number of inputs
@@ -209,6 +181,7 @@ void mexFunction(
   // get the command string
   // mxGetString (from API) will convert the first input prhs[0] to char
   CHECK_CMD
+
   char cmd[256];
   if (nrhs < 1 || mxGetString(prhs[0], cmd, sizeof(cmd)) > 64)
     mexErrMsgTxt("First input should be a command string less than 64 characters long.");
@@ -223,33 +196,37 @@ void mexFunction(
     if (nrhs < 1 || nrhs > 3) mexErrMsgTxt("init: requires 1. (optional) xml file path 2. (optional) tcp/ip port number");
     if (nlhs > 0) mexErrMsgTxt("init does not output anything");
 
-    quit();
-    raisim::RaiSimMsg::setFatalCallback([]() { mexErrMsgTxt(""); });
+    if (!initialized) {
+      raisim::RaiSimMsg::setFatalCallback([]() { mexErrMsgTxt(""); });
 
-    int portPosition;
-    if (mxIsChar(prhs[1])) {
-      GET_STRING(1, fileName)
-      world_.reset(new raisim::World(fileName));
-      portPosition = 2;
+      int portPosition;
+
+      if (mxIsChar(prhs[1])) {
+        GET_STRING(1, fileName)
+        world_.reset(new raisim::World(fileName));
+        portPosition = 2;
+      } else {
+        world_.reset(new raisim::World());
+        portPosition = 1;
+      }
+      server_.reset(new raisim::RaisimServer(world_.get()));
+
+      if (nrhs == portPosition + 1 && mxIsDouble(prhs[portPosition])) {
+        std::cout << "port number: " << (int)mxGetScalar(prhs[portPosition]) << std::endl;
+        server_->launchServer((int)mxGetScalar(prhs[portPosition]));        
+      } else {
+        server_->launchServer(8080);
+        std::cout << "port number: " << 8080 << std::endl;
+      }
+      
+      // ensures that, when fatal error occurs, matlab doesn't crash
+      // finish initialization
+      mexAtExit(quit);
+      mexLock();
+      initialized = true;
     } else {
-      world_.reset(new raisim::World());
-      portPosition = 1;
+      mexWarnMsgTxt("init: the world is already initialized");
     }
-    server_.reset(new raisim::RaisimServer(world_.get()));
-
-    if (nrhs == portPosition + 1 && mxIsDouble(prhs[portPosition])) {
-      std::cout << "port number: " << (int)mxGetScalar(prhs[portPosition]) << std::endl;
-      server_->launchServer((int)mxGetScalar(prhs[portPosition]));
-    } else {
-      server_->launchServer(8080);
-      std::cout << "port number: " << 8080 << std::endl;
-    }
-
-    // ensures that, when fatal error occurs, matlab doesn't crash
-    // finish initialization
-    mexAtExit(quit);
-    mexLock();
-    initialized = true;
     return;
   }
 
@@ -304,7 +281,6 @@ void mexFunction(
     CHECK_OUTPUT_SIZE(0)
     if(!server_)
       mexErrMsgTxt("no graphics option is chosen during init. Use the \"integrateNoGraphics\" method instead");
-
     server_->integrateWorldThreadSafe();
   }
   // integration
@@ -312,13 +288,6 @@ void mexFunction(
     CHECK_INPUT_SIZE(1)
     CHECK_OUTPUT_SIZE(0)
     world_->integrate();
-  }
-
-  else if (!strcmp("getNonlinearities", cmd)) {
-    CHECK_INPUT_SIZE(2)
-    CHECK_OUTPUT_SIZE(1)
-    GET_AS
-    RETURN_VEC(as->getNonlinearities(world_->getGravity()))
   }
 
   WORLD_NOARG(integrate1)
@@ -334,6 +303,7 @@ void mexFunction(
 
   GETTER(getGeneralizedCoordinate)
   GETTER(getGeneralizedVelocity)
+  GETTER(getNonlinearities)
   GETTER(getMassMatrix)
 
   FRAME_GETTER(getFramePosition, raisim::Vec3)
@@ -347,10 +317,10 @@ void mexFunction(
   GETTERJACO(getDenseFrameJacobian)
   GETTERJACO(getDenseFrameRotationalJacobian)
 
-  else if (!strcmp("getContactForcePositionsObject", cmd)) {
+  else if (!strcmp("getContactForceAndPositions", cmd)) {
     GETOBJ
     size_t bodyIdx;
-    CHECK_OUTPUT_SIZE(3)
+    CHECK_OUTPUT_SIZE(2)
 
     if(obj->getObjectType() == raisim::ARTICULATED_SYSTEM) {
       CHECK_INPUT_SIZE(3)
@@ -363,36 +333,32 @@ void mexFunction(
       CHECK_INPUT_SIZE(2)
       bodyIdx = 0;
     }
+
     raisim::Vec<3> impulse;
     raisim::Vec<3> position;
     std::vector<raisim::Vec<3>> impulseLists;
     std::vector<raisim::Vec<3>> positionLists;
-    std::vector<std::string> nameLists;
 
-    // "vector<string>" convert to  matlab "cell" type
     impulse.setZero();
-    for (auto& contact : obj->getContacts()) {
-      if (contact.getlocalBodyIndex() == bodyIdx && !contact.skip()) {
-        raisim::matvecmul(contact.getContactFrame(), contact.getImpulse(), impulse);
-        if (!contact.isObjectA())
+
+    for (auto& contact : obj->getContacts())
+      if (contact.getlocalBodyIndex() == bodyIdx) {
+        raisim::matvecmul(contact.getContactFrame(), *contact.getImpulse(), impulse);
+        if(!contact.isObjectA())
           impulse *= -1.;
         impulse /= world_->getTimeStep();
         impulseLists.push_back(impulse);
         positionLists.push_back(contact.getPosition());
-        nameLists.push_back(world_->getObjList()[contact.getPairObjectIndex()]->getName());
       }
-    }
+
     plhs[0] = mxCreateDoubleMatrix(3, impulseLists.size(), mxREAL);
     plhs[1] = mxCreateDoubleMatrix(3, impulseLists.size(), mxREAL);
-    plhs[2] = mxCreateCellMatrix(impulseLists.size(), 1);
+
     for (size_t k = 0; k < impulseLists.size(); k++) {
       memcpy(mxGetPr(plhs[0]) + k * 3, impulseLists[k].ptr(),
              sizeof(double) * 3);
       memcpy(mxGetPr(plhs[1]) + k * 3, positionLists[k].ptr(),
              sizeof(double) * 3);
-      mxArray* str = mxCreateString(nameLists[k].c_str());
-      mxSetCell(plhs[2], k, mxDuplicateArray(str));
-      mxDestroyArray(str);
     }
   }
 
@@ -473,72 +439,6 @@ void mexFunction(
 
   SINGLE_BODY_GETTER(getPosition)
   SINGLE_BODY_GETTER(getQuaternion)
-
-  else if (!strcmp("addVisualArticulatedSystem", cmd)) {
-    GET_STRING(1, name)
-    GET_STRING(2, filePath)
-    GET_COLOR(3, r, g, b, a)
-
-    server_->addVisualArticulatedSystem(name, filePath, r, g, b, a);
-  }
-
-  else if (!strcmp("updateVisualArticulatedSystem", cmd)) {
-    GET_STRING(1, name)
-    GET_EIGEN_VEC(2)
-    GET_COLOR(3, r, g, b, a)
-    auto* asv = server_->getVisualArticulatedSystem(name);
-    asv->setGeneralizedCoordinate(vec);
-    asv->setColor(r,g,b,a);
-  }
-
-  else if (!strcmp("addVisualSphere", cmd)) {
-    GET_STRING(1, name)
-    GET_DOUBLE(2, radius)
-    GET_COLOR(3, r, g, b, a)
-    server_->addVisualSphere(name, radius, r, g, b, a);
-  }
-
-  else if (!strcmp("addVisualCapsule", cmd)) {
-    GET_STRING(1, name)
-    GET_DOUBLE(2, radius)
-    GET_DOUBLE(3, length)
-    GET_COLOR(4, r, g, b, a)
-    server_->addVisualCapsule(name, radius, length, r, g, b, a);
-  }
-
-  else if (!strcmp("addVisualCylinder", cmd)) {
-    GET_STRING(1, name)
-    GET_DOUBLE(2, radius)
-    GET_DOUBLE(3, length)
-    GET_COLOR(4, r, g, b, a)
-    server_->addVisualCylinder(name, radius, length, r, g, b, a);
-  }
-
-  else if (!strcmp("addVisualBox", cmd)) {
-    GET_STRING(1, name)
-    GET_DOUBLE(2, x)
-    GET_DOUBLE(3, y)
-    GET_DOUBLE(4, z)
-    GET_COLOR(5, r, g, b, a)
-    server_->addVisualBox(name, x, y, z, r, g, b, a);
-  }
-
-  else if (!strcmp("updateVisualPose", cmd)) {
-    GET_STRING(1, name)
-    auto* vis = server_->getVisualObject(name);
-    {
-      GET_EIGEN_VEC_WITH_CHECK_AND_NAME(2, 3, position)
-      vis->setPosition(position);
-    }
-
-    {
-      GET_EIGEN_VEC_WITH_CHECK_AND_NAME(3, 4, quaternion)
-      vis->setOrientation(quaternion);
-    }
-
-    GET_COLOR(4, r, g, b, a)
-    vis->setColor(r,g,b,a);
-  }
 
   else {
     mexErrMsgTxt("The first argument must be from the available command list. Check either raisim_interface_mex.cpp file or MATLAB examples.");

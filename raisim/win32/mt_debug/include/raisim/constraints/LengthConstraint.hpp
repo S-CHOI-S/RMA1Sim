@@ -9,19 +9,12 @@
 
 #include <raisim/object/Object.hpp>
 #include "Constraints.hpp"
-#include "raisim/contact/Contact.hpp"
 
 namespace raisim {
 
 class LengthConstraint : public Constraints {
 
  public:
-  enum class WireType : int {
-    STIFF = 0,
-    COMPLIANT,
-    CUSTOM
-  };
-
   enum class StretchType : int {
     STRETCH_RESISTANT_ONLY = 0,
     COMPRESSION_RESISTANT_ONLY,
@@ -29,27 +22,14 @@ class LengthConstraint : public Constraints {
   };
 
   LengthConstraint(Object *obj1, size_t localIdx1, Vec<3> pos1_b, Object *obj2, size_t localIdx2, Vec<3> pos2_b, double length);
-  virtual ~LengthConstraint() = default;
 
   /**
-   * update internal variables (called by World::integrate1()) */
-  void update(contact::ContactProblems& contact_problems);
+   * update internal variables (called by integrate1()) */
+  void update();
 
   /**
    * @return the length of the wire */
   double getLength() const;
-
-  /**
-   * get wire width for visualization
-   * @return width
-   */
-  double getVisualizationWidth() { return width_; }
-
-  /**
-   * set visualization width
-   * @param width width
-   */
-  void setVisualizationWidth(double width) { width_ = width; }
 
   /**
    * @return the distance between the two mounting points */
@@ -104,30 +84,13 @@ class LengthConstraint : public Constraints {
   /**
    * set stretch type of the wire
    * Check http://raisim.com/sections/StiffLengthConstraint.html
-   * @param type the wire stretch type. Available types: STRETCH_RESISTANT_ONLY, COMPRESSION_RESISTANT_ONLY, BOTH */
+   * @param the wire stretch type. Available types: STRETCH_RESISTANT_ONLY, COMPRESSION_RESISTANT_ONLY, BOTH */
   void setStretchType(StretchType type) { stretchType_ = type; }
 
   /**
    * get the constraint's stretch type
    * @return the wire stretch type */
   StretchType getStretchType() const { return stretchType_; }
-
-  /**
-   * get wire type
-   * @return wire type */
-  WireType getWireType() const { return type_; }
-
-  /**
-   * get pos on ob1 where the wire is attached
-   * @return mount position 1
-   */
-  const Vec<3>& getOb1MountPos() const;
-
-  /**
-   * get pos on ob2 where the wire is attached
-   * @return mount position 2
-   */
-  const Vec<3>& getOb2MountPos() const;
 
  protected:
   Vec<3> position1_;
@@ -142,11 +105,8 @@ class LengthConstraint : public Constraints {
   double length_;
   double distance_;
   double stretch_;
-  double width_ = 0.02; /// for visualization only
-  WireType type_;
+  double dampedStretch_;
   StretchType stretchType_ = StretchType::COMPRESSION_RESISTANT_ONLY;
-
-  virtual void applyTension(contact::ContactProblems& contact_problems) = 0;
 
  public:
   bool isActive = false;

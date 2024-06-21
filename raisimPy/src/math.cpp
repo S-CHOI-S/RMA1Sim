@@ -39,6 +39,14 @@ using namespace raisim;
 
 
 void init_math(py::module &m) {
+
+    /********/
+    /* Math */
+    /********/
+
+    // the code to convert between the data types is in `converter.hpp` and `converter.cpp`.
+
+
     /******************/
     /* Transformation */
     /******************/

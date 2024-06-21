@@ -7,13 +7,12 @@
 #pragma once
 
 #include <string>
+#include "raisim/raisim_message.hpp"
+
 #include <fstream>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <algorithm>
-#include <vector>
-
-#include "raisim/raisim_message.hpp"
 
 #if WIN32
 #else
@@ -57,7 +56,7 @@ class Path {
       return Path(path_ + additionalPath, true);
   }
 
-  Path operator +(const Path& additionalPath) {
+    Path operator +(const Path& additionalPath) {
     return Path(path_ + separator() + additionalPath.getPath(), true);
   }
 
@@ -146,7 +145,7 @@ class Path {
     return raisim::Path(basePath);
 #else
     char cwd[PATH_MAX];
-    RSFATAL_IF(getcwd(cwd, sizeof(cwd))==0, "Could not read directory path.");
+    getcwd(cwd, sizeof(cwd));
     std::string basePath(argv0);
     std::string cwdStr(cwd);
 
@@ -162,19 +161,8 @@ class Path {
   }
 
  private:
+
   std::string path_;
 };
 
-inline static Path searchForFile(const std::string& filename, const Path& searchRoot, const std::vector<std::string>& hints) {
-  Path basePath = searchRoot.getString() + raisim::Path::separator() + filename;
-  if(basePath.fileExists()) {
-    return basePath;
-  } else {
-    for (const auto& h : hints) {
-      Path hintPath = searchRoot.getString() + raisim::Path::separator() + h + raisim::Path::separator() + filename;
-      if(hintPath.fileExists()) return hintPath;
-    }
-  }
-  return Path("");
-}
 }

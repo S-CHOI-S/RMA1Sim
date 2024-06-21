@@ -26,8 +26,6 @@
 #include <sstream>
 #include <iomanip>
 #include <functional>
-#include "math.h"
-
 
 namespace raisim {
 
@@ -65,9 +63,9 @@ class RaiSimMsg {
 
     auto now = std::chrono::system_clock::now();
     auto in_time_t = std::chrono::system_clock::to_time_t(now);
+    struct tm timeinfo;
 
 #ifdef WIN32
-    struct tm timeinfo;
     localtime_s(&timeinfo, &in_time_t);
     std::tm* timePtr = &timeinfo;
 #else
@@ -78,7 +76,7 @@ class RaiSimMsg {
              << std::put_time(timePtr, "%Y:%m:%d:%X")<< ' '
              << std::setfill(' ')
              << filename
-             << ':' << line << "] " << color << msg.str() << "\033[0m" << std::endl;
+             << ':' << line << "] " << color << msg.str() << "\033[0m\n";
 
     std::cout << printout.str();
 

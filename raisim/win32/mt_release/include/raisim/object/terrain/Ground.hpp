@@ -17,10 +17,6 @@ class Ground : public SingleBodyObject {
 
  public:
   Ground(double height);
-
-  /**
-   * returns the height of the plane
-   * @return the height */
   double getHeight() { return height_; }
 
  protected:

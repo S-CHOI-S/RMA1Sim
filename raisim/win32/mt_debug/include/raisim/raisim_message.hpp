@@ -8,7 +8,6 @@
 #define RAISIM_MESSAGE_HPP
 
 #include "raisim_message_logger.hpp"
-#include <math.h>
 
 #define RSMSG(msg, severity) { std::stringstream raimessagestream; \
                                 raimessagestream<<msg; \

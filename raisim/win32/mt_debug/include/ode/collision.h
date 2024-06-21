@@ -22,11 +22,14 @@
 
 #ifndef _ODE_COLLISION_H_
 #define _ODE_COLLISION_H_
-#include <cerrno>
+
 #include <ode/common.h>
 #include <ode/collision_space.h>
 #include <ode/contact.h>
-#include <ode/objects.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * @defgroup collide Collision Detection
@@ -789,8 +792,6 @@ ODE_API void dGeomGetOffsetQuaternion (dGeomID geom, dQuaternion result);
 ODE_API int dCollide (dGeomID o1, dGeomID o2, int flags, dContactGeom *contact,
 	      int skip);
 
-int dRayTest (dGeomID o1, dGeomID o2, int flags, dContactGeom *contact, int skip);
-
 /**
  * @brief Determines which pairs of geoms in a space may potentially intersect,
  * and calls the callback function for each candidate pair.
@@ -1519,5 +1520,9 @@ ODE_API void dSetColliderOverride (int i, int j, dColliderFn *fn);
 
 
 /* ************************************************************************ */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

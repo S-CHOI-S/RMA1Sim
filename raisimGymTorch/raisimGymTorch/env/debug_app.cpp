@@ -6,8 +6,6 @@
 #include "Environment.hpp"
 #include "VectorizedEnvironment.hpp"
 
-int THREAD_COUNT = 1;
-
 using namespace raisim;
 
 int main(int argc, char *argv[]) {
@@ -35,6 +33,7 @@ int main(int argc, char *argv[]) {
   }
   config_str.pop_back();
   VectorizedEnvironment<ENVIRONMENT> vecEnv(resourceDir, config_str);
+  vecEnv.init();
 
   Yaml::Node config;
   Yaml::Parse(config, config_str);
@@ -45,12 +44,18 @@ int main(int argc, char *argv[]) {
   EigenBoolVec dones(config["num_envs"].template As<int>(), 1);
   action.setZero();
 
-  Eigen::Ref<EigenRowMajorMat> ob_ref(observation), action_ref(action);
+  //Eigen::Ref<EigenRowMajorMat> ob_ref(observation), action_ref(action);
+  Eigen::Ref<EigenRowMajorMat> ob_ref(observation);
   Eigen::Ref<EigenVec> reward_ref(reward);
   Eigen::Ref<EigenBoolVec> dones_ref(dones);
 
+  for(int i =0; i< 10; i++){
   vecEnv.reset();
+  for(int j = 0; j < 400; j++){
+  action =  EigenRowMajorMat::Random(config["num_envs"].template As<int>(), vecEnv.getActionDim());
+  Eigen::Ref<EigenRowMajorMat> action_ref(action);
   vecEnv.step(action_ref, reward_ref, dones_ref);
-
+  }
+  }
   return 0;
 }
