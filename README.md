@@ -239,6 +239,15 @@ Additionally, the data files should be placed as follows:
   ├── ...
   ```
 
+> If the data file is properly placed, visualize the pretrained policy!
+
+```shell
+$ ./run_RMA_test.sh
+```
+> [!Tip]
+> If you are under the '[jump](https://github.com/S-CHOI-S/RMA1Sim/tree/jump)' or '[multi_direction](https://github.com/S-CHOI-S/RMA1Sim/tree/multi_direction)' tag, you will be able to find the executable file by the name of the respective tag!
+> > e.g. `run_jump_test.sh` OR `run_multi_test.sh`
+
 </br>
 
 ## Results
