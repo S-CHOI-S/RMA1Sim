@@ -116,8 +116,15 @@ __Essential 2.__ RaiSim
 ```shell
 $ git clone https://github.com/S-CHOI-S/RMA1Sim.git raisimLib
 ```
+> Add the following lines in your `~/.bashrc` file!
+```shell
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$WORKSPACE/raisim/linux/lib
+export PYTHONPATH=$PYTHONPATH:$WORKSPACE/raisim/linux/lib
+```
+
 > [!note]
-> After cloned the RaiSim repository, you should follow the instructions on [installation page](https://raisim.com/sections/Installation.html)
+> After cloned the RMA1Sim repository, you could follow the instructions on [installation page](https://raisim.com/sections/Installation.html)
+> > You can also follow the installation process provided below!
 
 > [!Caution]
 > Do not miss the activation key!
@@ -127,37 +134,51 @@ $ git clone https://github.com/S-CHOI-S/RMA1Sim.git raisimLib
 </div>
 </br>
 
-__Essential 3.__ RaisimGymTorch
-> RaisimGymTorch is a gym environment example with Raisim.  
+__Essential 3.__ Conda Environment
+> You should create a conda environment that can execute the project.
+
+```shell
+$ conda env create -f environment.yaml
+```
+```shell
+$ conda activate RMA1Sim
+```
+
+__Essential 4.__ Build RaiSim and RaisimGymTorch
+> This is the installation process for using the RaiSim simulation.  
+> RaisimGymTorch is a gym environment example with RaiSim.  
 > A simple pytorch-based RL framework is provided as well but it should work well with any other RL frameworks!
 
 ```shell
-$ cd {$workspace_dir}/raisimLib/raisimGymTorch
+$ ./build_raisimLib.sh
 ```
-```shell
-$ python setup.py develop
-```
+
+> [!Caution]
+> If you have the permission error, you can use this command line!
+> ```shell
+> $ sudo chmod +x build_raisimLib.sh
+> ```
 
 <br/>
 
 ## Usage
+> [!Note]
+> Our repository contains code related to [RMA](https://github.com/S-CHOI-S/RMA1Sim/tree/RMA), [multi_direction](https://github.com/S-CHOI-S/RMA1Sim/tree/multi_direction), and [jump](https://github.com/S-CHOI-S/RMA1Sim/tree/jump), each under __different tags__.  
+> You can set the desired version and run the code by using `git checkout [desired tag name]`!
+
 __Step 1.__ Train the policy
-> GPU_NUM can be found with the command ```nvidia-smi```!  
-> EXPT_ID will be your data file number.
+> You may run the code in your raisimLib directory!
 ```shell
-$ cd {$workspace_dir}/raisimLib/raisimGymTorch/raisimGymTorch/env/envs/rsg_a1_task
+$ ./run_RMA_train.sh
 ```
-```shell
-$ python runner.py --name random --gpu GPU_NUM --exptid EXPT_ID 
-```
+> [!Tip]
+> If you are under the '[jump](https://github.com/S-CHOI-S/RMA1Sim/tree/jump)' or '[multi_direction](https://github.com/S-CHOI-S/RMA1Sim/tree/multi_direction)' tag, you will be able to find the executable file by the name of the respective tag!
+> > e.g. `run_jump_train.sh` OR `run_multi_train.sh`
 
 __Step 2.__ Run RaisimUnity
 > You can check the robot using the Unity renderer.
 ```shell
-$ cd {$workspace_dir}/raisimLib/raisimUnity/"OS" # e.g. cd raisim_ws/raisimLib/raisimUnity/linux
-```
-``` shell
-$ ./raisimUnity.x86_64
+$ ./run_unity.sh
 ```
 
 __Step 3.__ Visualize the policy
@@ -183,27 +204,40 @@ $ python viz_policy.py \
 > If you want to download the pretrained data, please download the [RMA1Sim](https://drive.google.com/drive/folders/1mAwB3S2jnIrxw_yQOmWcerQ_lsq68K87?usp=sharing) file!
 
 Additionally, the data files should be placed as follows:
-```shell
-raisimGymTorch
-├── build
-├── CMakeLists.txt
-├── data
-│   └── anymal_locomotion
-│       └── jump
-├── raisimGymTorch
-├── ...
-```
-
-```shell
-raisimGymTorch
-├── build
-├── CMakeLists.txt
-├── data
-│   └── anymal_locomotion
-│       └── anymal_mod3
-├── raisimGymTorch
-├── ...
-```
+- __RMA__  
+  ```shell
+  raisimGymTorch
+  ├── build
+  ├── CMakeLists.txt
+  ├── data
+  │   └── base_policy
+  │   └── rsg_a1_task
+  │       └── pretrained
+  ├── raisimGymTorch
+  ├── ...
+  ```
+- __Multi Direction__  
+  ```shell
+  raisimGymTorch
+  ├── build
+  ├── CMakeLists.txt
+  ├── data
+  │   └── anymal_locomotion
+  │       └── anymal_mod3
+  ├── raisimGymTorch
+  ├── ...
+  ```
+- __Jump__  
+  ```shell
+  raisimGymTorch
+  ├── build
+  ├── CMakeLists.txt
+  ├── data
+  │   └── anymal_locomotion
+  │       └── jump
+  ├── raisimGymTorch
+  ├── ...
+  ```
 
 </br>
 
@@ -305,8 +339,11 @@ raisimGymTorch
     ✔️ _Joint Movement & Stable Landing_  
     $$reward_{landing}\ +=\ exp \left(-3 \left( \sqrt{\sum w_{joint}^2} + \sqrt{\sum (\theta_{joint} - \theta_{joint_{init}})^2 }\ \right) \right)$$
 
-- __Why do you think errors compounded in the Direction Changing Policy?__
-- __What methods did you use to input the control commands?__
+- __What methods did you use to input the control commands?__  
+  The current method involves inputting a direction vector. The correct approach is to consider the travel time and divide the semicircular angle of 180 degrees by the travel time. This way, we can input the velocity vector corresponding to each divided angle. Specifically, using a travel time of 1000ms, we divide 180 degrees into 1000 parts and increase the velocity vector accordingly. This approach allows us to input the tangential vector at each angle, enabling movement along the circular path.
+
+- __Why do you think errors compounded in the Direction Changing Policy?__  
+  As can be seen from the method in previous point, we are currently inputting velocity vectors. Therefore, the original goal of showing a semicircular shape is to verify that the robot follows the changing velocity vectors accurately. This differs from following a path. We have trained a policy through reinforcement learning to move in the desired direction. However, I believe this does not qualify as a closed loop (although it might be possible once fully trained). The reason is that the inputs provided in reinforcement learning are reference values to guide the robot in the desired direction, not constraints to prevent deviation. Therefore, to control the error in the current position, a closed loop is required, which involves receiving the absolute position of the robot through sensors and comparing it with the desired path to adjust the movement trajectory. The policy we developed can be seen as a policy that allows movement in the modified direction during this process.
 - __An integral action is needed in the reward function to eliminate offset errors.__
 
 
