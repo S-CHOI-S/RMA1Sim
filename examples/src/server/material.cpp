@@ -6,6 +6,7 @@
 
 int main(int argc, char* argv[]) {
   auto binaryPath = raisim::Path::setFromArgv(argv[0]);
+  raisim::World::setActivationKey(binaryPath.getDirectory() + "\\rsc\\activation.raisim");
 
   /// create raisim world
   raisim::World world;
@@ -25,12 +26,12 @@ int main(int argc, char* argv[]) {
   world.setMaterialPairProp("steel", "rubber", 0.8, 0.15, 0.001);
   world.setMaterialPairProp("steel", "copper", 0.8, 0.65, 0.001);
 
-  /// launch raisim server
+  /// launch raisim servear
   raisim::RaisimServer server(&world);
   server.launchServer();
 
   for (int i = 0; i < 5000; i++) {
-    RS_TIMED_LOOP(int(world.getTimeStep()*1e6))
+    raisim::MSLEEP(1);
     server.integrateWorldThreadSafe();
   }
 

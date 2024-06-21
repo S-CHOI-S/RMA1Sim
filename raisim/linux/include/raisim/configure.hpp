@@ -7,20 +7,14 @@
 #ifndef RAISIM_CONFIGURE_HPP
 #define RAISIM_CONFIGURE_HPP
 
-namespace raisim {
-
 typedef uint64_t CollisionGroup;
-
-#ifdef WIN32
-#define RAISIM_STATIC_COLLISION_GROUP CollisionGroup(1)<<31
-#else
 #define RAISIM_STATIC_COLLISION_GROUP CollisionGroup(1)<<63
-#endif
 
+namespace raisim {
 enum ObjectType : int { SPHERE = 0, BOX, CYLINDER, CONE, CAPSULE, MESH, HALFSPACE, COMPOUND, HEIGHTMAP, ARTICULATED_SYSTEM, UNRECOGNIZED };
 
 inline bool isSingleBody(ObjectType type) {
-  return type==SPHERE || type==BOX || type==CYLINDER || type==CAPSULE || type==MESH || type==COMPOUND || type==HALFSPACE || type==HEIGHTMAP;
+  return type==SPHERE || type==BOX || type==CYLINDER || type==CAPSULE || type==MESH || type==COMPOUND || type==HALFSPACE;
 }
 
 inline bool isMovableBody(ObjectType type) {
@@ -63,9 +57,7 @@ inline ObjectType stringToObjectType(const std::string& typeName) {
   else if (typeName == "heightmap")
     return HEIGHTMAP;
   else if (typeName == "articulatedSystem")
-    return ARTICULATED_SYSTEM;
-  else if (typeName == "articulated_system")
-    return ARTICULATED_SYSTEM;
+    return ARTICULATED_SYSTEM;  
 
   return ObjectType::UNRECOGNIZED;
 }
@@ -102,9 +94,6 @@ inline std::string objectTypeToString(ObjectType type) {
 
     case ARTICULATED_SYSTEM:
       return "articulatedSystem";
-
-    case UNRECOGNIZED:
-      return "unrecognized";
   }
 
   return "";

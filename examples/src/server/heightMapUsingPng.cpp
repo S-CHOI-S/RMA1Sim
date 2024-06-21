@@ -6,6 +6,7 @@
 
 int main(int argc, char* argv[]) {
   auto binaryPath = raisim::Path::setFromArgv(argv[0]);
+  raisim::World::setActivationKey(binaryPath.getDirectory() + "\\rsc\\activation.raisim");
 
   /// create raisim world
   raisim::World world;
@@ -16,14 +17,13 @@ int main(int argc, char* argv[]) {
   auto anymal = world.addArticulatedSystem(binaryPath.getDirectory() + "\\rsc\\anymal\\urdf\\anymal.urdf");
   anymal->setGeneralizedCoordinate({0, 0, 10.8, 1.0, 0.0, 0.0, 0.0, 0.03, 0.4, -0.8, -0.03, 0.4, -0.8, 0.03, -0.4, 0.8, -0.03, -0.4, 0.8});
   anymal->setName("anymal");
-  heightMap->setAppearance("soil1");
 
-  /// launch raisim server
+  /// launch raisim servear
   raisim::RaisimServer server(&world);
   server.launchServer();
 
   for (int i = 0; i < 50000; i++) {
-    RS_TIMED_LOOP(int(world.getTimeStep()*1e6))
+    raisim::MSLEEP(1);
     server.integrateWorldThreadSafe();
   }
 

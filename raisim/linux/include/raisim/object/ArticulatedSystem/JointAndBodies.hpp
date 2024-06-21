@@ -6,13 +6,11 @@
 #ifndef RAISIM_JOINTANDBODIES_HPP
 #define RAISIM_JOINTANDBODIES_HPP
 
-#include <unordered_map>
-
+#include "ode/objects.h"
 #include "ode/ode.h"
-
 #include "raisim/math.hpp"
 #include "raisim/object/singleBodies/Mesh.hpp"
-#include "raisim/sensors/Sensors.hpp"
+#include <unordered_map>
 
 namespace raisim {
 
@@ -25,40 +23,16 @@ class LoadFromURDF2;
 
 /* shapes that raisim supports */
 namespace Shape {
-enum Type : int {
+enum Type :
+    int {
   Box = 0,
   Cylinder,
   Sphere,
   Mesh,
   Capsule,
   Cone, // cone is not currently supported
-  Ground,
-  CoordinateFrame,
-  Arrow,
-  RotationalArrow,
-  HeightMap,
-  PolyLine,
-  SingleLine,
   NotShape
 };
-
-inline Shape::Type stringToShape(const std::string &shape) {
-  if (shape == "mesh") {
-    return Shape::Type::Mesh;
-  } else if (shape == "sphere") {
-    return Shape::Type::Sphere;
-  } else if (shape == "capsule") {
-    return Shape::Type::Capsule;
-  } else if (shape == "cylinder") {
-    return Shape::Type::Cylinder;
-  } else if (shape == "box") {
-    return Shape::Type::Box;
-  } else if (shape == "plane") {
-    return Shape::Type::Ground;
-  }
-  return Shape::Type::NotShape;
-}
-
 }
 
 /* collision definition that is stored in Articulated System.
@@ -69,9 +43,8 @@ struct CollisionDefinition {
       rotOffset(rotOffsetI),
       posOffset(posOffsetI),
       localIdx(localIdxI),
-      colObj(colObjI){
-    colObj->name = nameI;
-  }
+      colObj(colObjI),
+      name(std::move(nameI)) {}
 
  public:
   friend class raisim::ArticulatedSystem;
@@ -86,15 +59,12 @@ struct CollisionDefinition {
   const dGeomID getCollisionObject() const { return colObj; }
   dGeomID getCollisionObject() { return colObj; }
 
-  // check https://raisim.com/sections/Contact.html to know more about collision group and mask
-  void setCollisionGroup(CollisionGroup group);
-  void setCollisionMask(CollisionGroup mask);
-  CollisionGroup getCollisionGroup() const;
-  CollisionGroup getCollisionMask() const;
-
   raisim::Mat<3, 3> rotOffset;
   raisim::Vec<3> posOffset;
+  std::string name;
   size_t localIdx;
+
+ protected:
   dGeomID colObj;
 };
 
@@ -103,8 +73,7 @@ typedef std::vector<CollisionDefinition> CollisionSet;
 /// visualization definition created by a user or URDF
 struct VisObject {
 
-  /**
-   * to add primitive
+  /* to add primitive
    * vis_shape: choices, Box, Cylinder, Sphere, Capsule
    * vis_shapeParam: params associated with shape,
    *      for sphere: {radius},
@@ -117,7 +86,7 @@ struct VisObject {
    * vis_name: name of the visualized body,
    * vis_material: material */
   VisObject(Shape::Type vis_shape,
-            const raisim::Vec<4> &vis_shapeParam,
+            const std::vector<double> &vis_shapeParam,
             const raisim::Vec<3> &vis_origin,
             const raisim::Mat<3, 3> &vis_rotMat,
             const raisim::Vec<4> &vis_color,
@@ -161,7 +130,7 @@ struct VisObject {
    * vis_name: name of the visualized body,
    * vis_material: material */
   VisObject(Shape::Type vis_shape,
-            const raisim::Vec<4> &vis_shapeParam,
+            const std::vector<double> &vis_shapeParam,
             const raisim::Vec<3> &vis_origin,
             const raisim::Mat<3, 3> &vis_rotMat,
             const raisim::Vec<4> &vis_color,
@@ -175,7 +144,7 @@ struct VisObject {
   }
 
   Shape::Type shape;
-  raisim::Vec<4> visShapeParam;
+  std::vector<double> visShapeParam;
   raisim::Vec<3> offset;
   raisim::Mat<3, 3> rot;
   raisim::Vec<4> color;
@@ -189,8 +158,8 @@ struct VisObject {
 class Joint {
  public:
 
-  enum Type : int {
-    FIXED = 0,
+  enum Type {
+    FIXED,
     REVOLUTE,
     PRISMATIC,
     SPHERICAL,
@@ -199,10 +168,6 @@ class Joint {
 
   Joint() {
     rot.setIdentity();
-    limit.setZero();
-    springMount.setZero();
-    pos_P.setZero();
-    axis = {0,0,1};
   }
 
   /* if upper and lower bounds of the limit are the same, the limit is ignored */
@@ -212,7 +177,7 @@ class Joint {
         const Vec<2> &joint_limit,
         Type joint_type,
         const std::string &joint_name) :
-      axis(joint_axis), pos_P(joint_pos_P), rot(joint_rot), limit(joint_limit), type(joint_type), name(joint_name) { }
+      axis(joint_axis), pos_P(joint_pos_P), rot(joint_rot), limit(joint_limit), type(joint_type), name(joint_name) {}
 
   void jointAxis(std::initializer_list<double> a) {
     axis[0] = *(a.begin());
@@ -271,13 +236,11 @@ class Joint {
   Mat<3, 3> rot;
   Vec<2> limit;
   Type type;
-  double effort = 1e150;
+  double effort = -1.;
   double damping = 0.0, friction = 0.0;
   double stiffness = 0.;
   double rotor_inertia = 0.;
-  double velocity_limit = 0.;
   Vec<4> springMount;
-  double jointRef = 0.;
   std::string name;
 };
 
@@ -288,15 +251,14 @@ class CoordinateFrame {
   size_t parentId, currentBodyId;
   std::string name; // name of the joint
   std::string parentName; // name of the parent body
-  std::string bodyName; // name of the urdf link attached to the joint
+  std::string bodyName; // name of the body attached to the joint
   bool isChild =
       false; // child is the first body after movable joint. All fixed bodies attached to a child is not a child
   Joint::Type jointType; // type of the associated joint
 };
 
 struct CollisionBody {
-  /**
-   * to add a primitive
+  /* to add a primitive
    * col_shape: choices, Box, Cylinder, Sphere, mesh, Capsule
    * col_shapeParam: params associated with shape,
    *      for sphere: {radius},
@@ -310,7 +272,7 @@ struct CollisionBody {
    * col_material: collision material that defines contact physics
    * col_visualizedMaterial: how the collision body should be visualized */
   CollisionBody(Shape::Type col_shape,
-                const Vec<4> &col_shapeParam,
+                const std::vector<double> &col_shapeParam,
                 const raisim::Vec<3> &col_origin,
                 const raisim::Mat<3, 3> &col_rotMat,
                 const std::string &col_name,
@@ -322,8 +284,7 @@ struct CollisionBody {
     RSFATAL_IF(col_shape == Shape::Type::Mesh, "This constructor is for primitive shapes")
   }
 
-  /**
-   * to add mesh
+  /* to add mesh
    * col_meshFile: file location relative to the resource directory of the articulated system,
    * col_origin: position of the collision object
    * col_rotMat: orientation of the collision object
@@ -344,17 +305,15 @@ struct CollisionBody {
 
   Shape::Type shape;
   raisim::Vec<3> scale;
-  raisim::Vec<4> shapeParam;
+  std::vector<double> shapeParam;
   raisim::Vec<3> offset;
   raisim::Mat<3, 3> rot;
   std::string name;
   std::string materialName; /// collision property
   std::string collisionVisualizationMaterial; /// collision property
   std::string colMeshFileName;
-  CollisionGroup group = 1, mask = -1;
 
-  /**
-   * col_shape: choices, Box, Cylinder, Sphere, mesh, Capsule
+  /* col_shape: choices, Box, Cylinder, Sphere, mesh, Capsule
    * col_shapeParam: params associated with shape,
    *      for sphere: {radius},
    *      for Box: {lx, ly, lz},
@@ -369,7 +328,7 @@ struct CollisionBody {
    * col_visualizedMaterial: how the collision body should be visualized
    * col_meshFile: file location relative to the resource directory of the articulated system */
   CollisionBody(Shape::Type col_shape,
-                const Vec<4> &col_shapeParam,
+                const std::vector<double> &col_shapeParam,
                 const raisim::Vec<3> &col_origin,
                 const raisim::Mat<3, 3> &col_rotMat,
                 const raisim::Vec<3> &col_meshScale,
@@ -380,57 +339,7 @@ struct CollisionBody {
       shape(col_shape), scale(col_meshScale), shapeParam(col_shapeParam), offset(col_origin),
       rot(col_rotMat), name(col_name), materialName(col_material),
       collisionVisualizationMaterial(col_visualizedMaterial), colMeshFileName(col_meshFileName) {}
-
 };
-
-inline void getInertialAssumingUniformDensity(Shape::Type shape,
-                                       const Vec<4> &shapeParam,
-                                       const Mat<3,3>& rot,
-                                       double density,
-                                       double &mass,
-                                       Mat<3, 3> &inertia) {
-  Mat<3, 3> inertiaP; // about the principle axes
-  inertiaP.setZero();
-  double volume = 0.;
-
-  if (shape == Shape::Type::Sphere) {
-    volume = shapeParam[0] * shapeParam[0] * shapeParam[0] * M_PI * 4. / 3.;
-  } else if (shape == Shape::Type::Box) {
-    volume = shapeParam[0] * shapeParam[1] * shapeParam[2];
-  } else if (shape == Shape::Type::Capsule) {
-    volume = shapeParam[0] * shapeParam[0] * shapeParam[0] * M_PI * 4. / 3.
-        + M_PI * shapeParam[0] * shapeParam[0] * shapeParam[1];
-  } else if (shape == Shape::Type::Cylinder) {
-    volume = M_PI * shapeParam[0] * shapeParam[0] * shapeParam[1];
-  }
-
-  mass = volume * density;
-
-  if (shape == Shape::Type::Sphere) {
-    double diagonal = 2. / 5. * mass * shapeParam[0] * shapeParam[0];
-    inertiaP[0] = diagonal;
-    inertiaP[4] = diagonal;
-    inertiaP[8] = diagonal;
-  } else if (shape == Shape::Type::Box) {
-    inertiaP[0] = mass / 12.0 * (shapeParam[1] * shapeParam[1] + shapeParam[2] * shapeParam[2]);
-    inertiaP[4] = mass / 12.0 * (shapeParam[0] * shapeParam[0] + shapeParam[2] * shapeParam[2]);
-    inertiaP[8] = mass / 12.0 * (shapeParam[0] * shapeParam[0] + shapeParam[1] * shapeParam[1]);
-  } else if (shape == Shape::Type::Capsule) {
-    inertiaP[0] = mass / 12.0 * (3. * shapeParam[0] * shapeParam[0] + shapeParam[1] * shapeParam[1]);
-    inertiaP[4] = mass / 12.0 * (3. * shapeParam[0] * shapeParam[0] + shapeParam[1] * shapeParam[1]);
-    inertiaP[8] = mass / 2.0 * (shapeParam[0] * shapeParam[0]);
-  } else if (shape == Shape::Type::Cylinder) {
-    double sIner = 2. / 5. * mass * shapeParam[0] * shapeParam[0];
-    double sMass = density * shapeParam[0] * shapeParam[0] * shapeParam[0] * M_PI * 4. / 3.;
-    inertiaP[0] = mass / 12.0 * (3. * shapeParam[0] * shapeParam[0] + shapeParam[1] * shapeParam[1]) + sIner
-        + sMass * shapeParam[1] * shapeParam[1] / 4.;
-    inertiaP[4] = mass / 12.0 * (3. * shapeParam[0] * shapeParam[0] + shapeParam[1] * shapeParam[1]) + sIner
-        + sMass * shapeParam[1] * shapeParam[1] / 4.;
-    inertiaP[8] = mass / 2.0 * (shapeParam[0] * shapeParam[0]) + sIner;
-  }
-
-  inertia = rot * inertiaP * rot.transpose();
-}
 
 class Body {
   friend class ArticulatedSystem;
@@ -440,7 +349,6 @@ class Body {
   Body() {
     mass_ = 0;
     inertia_.setZero();
-    com_.setZero();
   }
 
   Body(double mass, const Mat<3, 3> &inertia, const Vec<3> &comPos) :
@@ -451,6 +359,7 @@ class Body {
   double &getMass() { return mass_; }
 
   void setInertia(std::initializer_list<double> inertia) {
+//    LOG_IF(INFO, inertia.size() != 6) << "Provide 6 elements for inertia matrix";
     inertia_[0] = *(inertia.begin());
     inertia_[1] = *(inertia.begin() + 1);
     inertia_[2] = *(inertia.begin() + 2);
@@ -464,7 +373,8 @@ class Body {
     inertia_[8] = *(inertia.begin() + 5);
   }
 
-  void setInertia(const Vec<3> &inertia) {
+  void setInertia(Vec<3> inertia) {
+//    LOG_IF(INFO, inertia.size() != 6) << "Provide 6 elements for inertia matrix";
     inertia_[0] = inertia[0];
     inertia_[1] = 0;
     inertia_[2] = 0;
@@ -478,7 +388,8 @@ class Body {
     inertia_[8] = inertia[2];
   }
 
-  void setInertia(const Vec<6> &inertia) {
+  void setInertia(Vec<6> inertia) {
+//    LOG_IF(INFO, inertia.size() != 6) << "Provide 6 elements for inertia matrix";
     inertia_[0] = inertia[0];
     inertia_[1] = inertia[1];
     inertia_[2] = inertia[2];
@@ -490,20 +401,6 @@ class Body {
     inertia_[6] = inertia[2];
     inertia_[7] = inertia[4];
     inertia_[8] = inertia[5];
-  }
-
-  void setInertiaMjcfOrder(const Vec<6> &inertia) {
-    inertia_[0] = inertia[0];
-    inertia_[4] = inertia[1];
-    inertia_[8] = inertia[2];
-
-    inertia_[1] = inertia[3];
-    inertia_[2] = inertia[4];
-    inertia_[5] = inertia[5];
-
-    inertia_[3] = inertia[3];
-    inertia_[6] = inertia[4];
-    inertia_[7] = inertia[5];
   }
 
   void setZeroInertial() {
@@ -526,18 +423,15 @@ class Body {
     visObj.clear();
   }
 
-  void
-  addCollisionObject(Shape::Type shape,
-                     const Vec<4> &param,
-                     const raisim::Vec<3> &origin,
-                     const raisim::Mat<3, 3> &rot,
-                     const raisim::Vec<3> &scale,
-                     const std::string &colName,
-                     const std::string &materialName, /// collision property
-                     const std::string &collisionVisualizedMaterial, /// collision property
-                     const std::string &meshFileName,
-                     CollisionGroup group = CollisionGroup(-1),
-                     CollisionGroup mask = CollisionGroup(-1)) {
+  void addCollisionObject(Shape::Type shape,
+                          const std::vector<double> &param,
+                          const raisim::Vec<3> &origin,
+                          const raisim::Mat<3, 3> &rot,
+                          const raisim::Vec<3> &scale,
+                          const std::string &colName,
+                          const std::string &materialName, /// collision property
+                          const std::string &collisionVisualizedMaterial, /// collision property
+                          const std::string &meshFileName) {
     colObj.emplace_back(shape,
                         param,
                         origin,
@@ -550,7 +444,7 @@ class Body {
   }
 
   void addVisualObject(Shape::Type shape,
-                       const Vec<4> &shapeParam,
+                       const std::vector<double> &shapeParam,
                        const raisim::Vec<3> &origin,
                        const raisim::Mat<3, 3> &rotMat,
                        const raisim::Vec<4> &color,
@@ -571,10 +465,13 @@ class Body {
 
   std::vector<CollisionBody> colObj;
   std::vector<VisObject> visObj;
+
+  Vec<3> combinedColPos;
+  Mat<3, 3> combinedColRotMat;
+
   double mass_;
   Mat<3, 3> inertia_;
   Vec<3> com_;
-  std::vector<std::shared_ptr<Sensor>> sensor;
 };
 
 class Child {
@@ -630,10 +527,6 @@ class Child {
   void initVisuals(std::vector<VisObject> &collect);
 
   void consumeFixedBodies(std::vector<CoordinateFrame> &frameOfInterest);
-
-  void processJointRef();
-
-  void changeParent(Child &ch, Child &gch);
 
   void addChild(const Child &childNode) {
     if (childNode.joint.type == Joint::Type::FIXED) {

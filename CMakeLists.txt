@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.11)
-set(RAISIM_VERSION 1.1.8)
+cmake_minimum_required(VERSION 3.10)
+set(RAISIM_VERSION 1.0.0)
 project(raisim VERSION ${RAISIM_VERSION} LANGUAGES CXX)
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
@@ -10,41 +10,25 @@ include(GNUInstallDirs)
 option(RAISIM_EXAMPLE "Build example applications." TRUE)
 option(RAISIM_MATLAB "Build a matlab wrapper." FALSE)
 option(RAISIM_PY "Build a python wrapper." FALSE)
-option(RAISIM_DOC "Build a raisim documentation. You can find the latest doc in raisim.com." FALSE)
+option(RAISIM_DOC "Build a python wrapper." FALSE)
 
 if (UNIX AND NOT APPLE AND NOT ANDROID AND NOT WEBGL AND NOT WIN32)
-    if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "aarch64")
-        set(RAISIM_OS linux-arm)
-    else ()
-        set(RAISIM_OS linux)
-    endif ()
-
+    set(RAISIM_OS linux)  
     list(APPEND CMAKE_PREFIX_PATH ${CMAKE_CURRENT_SOURCE_DIR}/raisim/${RAISIM_OS})
 elseif(APPLE)
-    execute_process(COMMAND sysctl -q hw.optional.arm64
-            OUTPUT_VARIABLE _sysctl_stdout
-            ERROR_VARIABLE _sysctl_stderr
-            RESULT_VARIABLE _sysctl_result
-            )
-    if(_sysctl_result EQUAL 0 AND _sysctl_stdout MATCHES "hw.optional.arm64: 1")
-        set(RAISIM_OS m1)
-    else()
-        set(RAISIM_OS mac)
-    endif()
+    set(RAISIM_OS mac)
     list(APPEND CMAKE_PREFIX_PATH ${CMAKE_CURRENT_SOURCE_DIR}/raisim/${RAISIM_OS})
 elseif(WIN32)
     set(RAISIM_OS win32)
-    list(APPEND CMAKE_PREFIX_PATH ${CMAKE_CURRENT_SOURCE_DIR}/raisim/${RAISIM_OS})
-    list(APPEND CMAKE_PREFIX_PATH ${CMAKE_CURRENT_SOURCE_DIR}/thirdParty/Eigen3)
+    list(APPEND CMAKE_PREFIX_PATH ${CMAKE_CURRENT_SOURCE_DIR}/raisim/${RAISIM_OS}/mt_release)
+    list(APPEND CMAKE_PREFIX_PATH ${CMAKE_CURRENT_SOURCE_DIR}/raisim/${RAISIM_OS}/mt_debug)
 endif()
 
 #==
 # Package installation
 #==
-set(RAISIM_BIN_DIR ${RAISIM_OS})
-message("-- Detected OS/Architecture is ${RAISIM_OS}")
-
 if(WIN32)
+    set(RAISIM_BIN_DIR ${RAISIM_OS}/mt_release)
     install(
         DIRECTORY
         ${CMAKE_CURRENT_LIST_DIR}/raisim/${RAISIM_BIN_DIR}/bin
@@ -52,13 +36,9 @@ if(WIN32)
         ${CMAKE_INSTALL_PREFIX}
     )
 else()
-    install(
-        DIRECTORY
-        ${CMAKE_CURRENT_LIST_DIR}/raisim/${RAISIM_BIN_DIR}/lib
-        DESTINATION
-        ${CMAKE_INSTALL_PREFIX}
-    )
+    set(RAISIM_BIN_DIR ${RAISIM_OS})
 endif()
+
 
 install(
         DIRECTORY
@@ -67,7 +47,12 @@ install(
         ${CMAKE_INSTALL_PREFIX}
 )
 
-install(FILES package.xml DESTINATION "${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}")
+install(
+        DIRECTORY
+        "${CMAKE_CURRENT_LIST_DIR}/raisim/${RAISIM_BIN_DIR}/lib"
+        DESTINATION
+        ${CMAKE_INSTALL_PREFIX}
+)
 
 if(RAISIM_ALL)
     set(RAISIM_EXAMPLE TRUE)
@@ -92,6 +77,5 @@ endif()
 if(RAISIM_DOC)
     add_subdirectory(docs)
 endif()
-
 
 # EOF

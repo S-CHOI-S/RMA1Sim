@@ -132,13 +132,9 @@ class DynamicArray{
 #ifdef _WIN32
     v = static_cast<double *>(
         Eigen::internal::handmade_aligned_malloc(size * sizeof(double)));
-#endif
-
-#ifdef __linux__
+#elif __linux__
     v = static_cast<double*>(aligned_alloc(32, size * sizeof(double)));
-#endif
-
-#ifdef __APPLE__
+#elif __APPLE__
     v = static_cast<double*>(aligned_alloc(32, size * sizeof(double)));
 #endif
   }
@@ -146,13 +142,9 @@ class DynamicArray{
   void dealloc() {
 #ifdef __APPLE__
     if (v) aligned_free(v);
-#endif
-
-#ifdef __linux__
+#elif __linux__
     free(v);
-#endif
-
-#ifdef _WIN32
+#elif WIN32
     if (v) Eigen::internal::handmade_aligned_free(v);
 #endif
   }
@@ -202,7 +194,7 @@ inline std::ostream &operator<<(std::ostream &os, const Mat<n,m> &mat) {
 class VecDyn: public DynamicArray {
  public:
 
-  size_t n = 0;
+  size_t n;
   typedef Eigen::Map<Eigen::Matrix<double, -1, 1> > EigenVecn;
   typedef Eigen::Map<const Eigen::Matrix<double, -1, 1> > ConstEigenVecn;
 
@@ -212,8 +204,8 @@ class VecDyn: public DynamicArray {
     resize(size);
   }
 
-  inline double operator ()(size_t i, size_t j) const { return v[i+j*0]; }
-  inline double & operator ()(size_t i, size_t j) {return v[i+j*0];}
+  inline double operator ()(size_t i, size_t j) const { return v[i]; }
+  inline double & operator ()(size_t i, size_t j) {return v[i];}
 
   size_t size() const {
     return n;
@@ -446,10 +438,6 @@ class MatDyn: public DynamicArray {
     for (size_t i = 0; i < n * m; i++) v[i] = 0;
   }
 
-  inline void setConstant(double cValue) {
-    for (size_t i = 0; i < n * m; i++) v[i] = cValue;
-  }
-
   inline double sum() const {
     double summ = 0;
     for (size_t j = 0; j < m; j++)
@@ -507,6 +495,7 @@ class SparseJacobian {
 
   inline void resize(size_t cols) {
     size = cols;
+    DRSFATAL_IF(cols<1, "assigning zero volume")
     if(capacity < cols){
       v.resize(3, cols);
       v.setZero();
@@ -611,15 +600,9 @@ class SparseJacobian1D {
 };
 
 struct Transformation {
-  Transformation () {
-    rot.setIdentity();
-    pos.setZero();
-  }
-
   Mat<3,3> rot;
   Vec<3> pos;
 };
-
 
 template<size_t n>
 static inline void cholInv(const double * A, double * AInv) {
@@ -674,48 +657,6 @@ static inline void cholInv(const double * A, double * AInv) {
   for (i = 1; i < n; i++)
     for (j = 0; j < i; j++)
       AInv[i + n * j] = AInv[j + n * i];
-}
-
-template<int n>
-static inline void cholInv2(const double * A, double * AInv) {
-  int i, j, k;
-  Mat<18,18> Mtemp;
-  Vec<18> temp2;
-  memcpy(Mtemp.ptr(), A, n * n * sizeof(double));
-
-  for (i = n - int(1); i != int(-1); --i) {
-    const int idof = i * n;
-    const int iidof = idof + i;
-    Mtemp[iidof] = std::sqrt(Mtemp[iidof]);
-    temp2[i] = 1. / Mtemp[iidof];
-
-    for (j=0; j<i; ++j)
-      Mtemp[j + idof] *= temp2[i];
-
-    for (j=0; j<i; ++j)
-      for (k=0; k<j+1; ++k)
-        Mtemp[k + j * n] -= Mtemp[j + idof] * Mtemp[k + idof];
-  }
-
-  AInv[0] = 0.;
-  for (j = int(0); j < n; ++j) {
-    const int jdof = j * n;
-    const int jjdof = j * n + j;
-    AInv[jjdof] = temp2[j] - Mtemp[jdof] * AInv[jdof];
-    for (k = 1; k < j; k++)
-      AInv[jjdof] -= Mtemp[k + jdof] * AInv[k + jdof];
-
-    AInv[jjdof] *= temp2[j];
-    for (i = j + int(1); i < n; ++i) {
-      const int idof = i * n;
-      AInv[i + jdof] = -Mtemp[idof] * AInv[jdof];
-      for (k = int(1); k < i; ++k)
-        AInv[i + jdof] -= Mtemp[k + idof] * AInv[k + jdof];
-
-      AInv[i + jdof] *= temp2[i];
-      AInv[j + idof] = AInv[i + jdof];
-    }
-  }
 }
 
 inline void quatToRotMat(const Vec<4> &q, Mat<3, 3> &R) {
@@ -1375,12 +1316,6 @@ inline void crossThenAdd(const Vec<3> &vec1, const Vec<3> &vec2, Vec<3> &vec) {
   vec[2] += vec1[0] * vec2[1] - vec1[1] * vec2[0];
 }
 
-inline void crossThenAdd(const Vec<3> &vec1, const Vec<3> &vec2, double* vec) {
-  vec[0] += vec1[1] * vec2[2] - vec1[2] * vec2[1];
-  vec[1] += vec1[2] * vec2[0] - vec1[0] * vec2[2];
-  vec[2] += vec1[0] * vec2[1] - vec1[1] * vec2[0];
-}
-
 inline void crossThenAdd(const double *vec1, const double *vec2, double *vec) {
   vec[0] += vec1[1] * vec2[2] - vec1[2] * vec2[1];
   vec[1] += vec1[2] * vec2[0] - vec1[0] * vec2[2];
@@ -1580,48 +1515,6 @@ inline void rotationIntegration(Mat<3,3>& rotationMatrix, double dt, const Vec<3
   /// TODO:: figure out where you want to normalize the rotation
   matmul(expM, rotationMatrix, temp);
   rotationMatrix = temp;
-}
-
-inline void rotationIntegration(const Mat<3,3>& initial, Mat<3,3>& final, double dt, const Vec<3>& angVel) {
-
-  /// exponential map
-  const double norm = angVel.norm();
-  const double angle = norm*dt;
-  if (angle < 1e-11) {
-    final = initial;
-    return;
-  }
-  const double normInv = 1.0/norm;
-
-  const double x = angVel[0] * normInv;
-  const double y = angVel[1] * normInv;
-  const double z = angVel[2] * normInv;
-
-  const double s = sin(angle);
-  const double c = 1.0 - cos(angle);
-
-  const double t2 = c*x*y;
-  const double t3 = z*z;
-  const double t4 = s*y;
-  const double t5 = c*x*z;
-  const double t6 = c*y*z;
-  const double t7 = x*x;
-  const double t8 = y*y;
-
-  Mat<3,3> expM;
-
-  expM[0] = -c*t3-c*t8+1.0;
-  expM[3] = t2-s*z;
-  expM[6] = t4+t5;
-  expM[1] = t2+s*z;
-  expM[4] = -c*t3-c*t7+1.0;
-  expM[7] = t6-s*x;
-  expM[2] = -t4+t5;
-  expM[5] = t6+s*x;
-  expM[8] = -c*t7-c*t8+1.0;
-
-  /// TODO:: figure out where you want to normalize the rotation
-  matmul(expM, initial, final);
 }
 
 inline void rotationIntegration(Mat<3,3>& rotationMatrix, double dt, const double* angVel) {

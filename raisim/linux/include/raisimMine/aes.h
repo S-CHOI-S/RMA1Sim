@@ -27,8 +27,6 @@
 #include <unordered_map>
 #include <vector>
 #include <map>
-#include <stdint.h>
-
 #include "mine-common.h"
 
 namespace mine {

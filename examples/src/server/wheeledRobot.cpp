@@ -6,6 +6,7 @@
 
 int main(int argc, char* argv[]) {
   auto binaryPath = raisim::Path::setFromArgv(argv[0]);
+  raisim::World::setActivationKey(binaryPath.getDirectory() + "\\rsc\\activation.raisim");
 
   raisim::World world;
   world.setTimeStep(0.002);
@@ -27,13 +28,13 @@ int main(int argc, char* argv[]) {
   robot->setIntegrationScheme(raisim::ArticulatedSystem::IntegrationScheme::SEMI_IMPLICIT);
   robot->setControlMode(raisim::ControlMode::FORCE_AND_TORQUE);
 
-  /// launch raisim server
+  /// launch raisim servear
   raisim::RaisimServer server(&world);
   server.launchServer();
   server.focusOn(robot);
 
-  for (int i=0; i<20000000; i++) {
-    RS_TIMED_LOOP(int(world.getTimeStep()*1e6))
+  for (int i=0; i<20000; i++) {
+    std::this_thread::sleep_for(std::chrono::microseconds(10000));
     server.integrateWorldThreadSafe();
   }
 

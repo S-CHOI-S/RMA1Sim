@@ -6,6 +6,7 @@
 
 int main(int argc, char* argv[]) {
   auto binaryPath = raisim::Path::setFromArgv(argv[0]);
+  raisim::World::setActivationKey(binaryPath.getDirectory() + "\\rsc\\activation.raisim");
 
   /// create raisim world
   raisim::World world;
@@ -31,17 +32,15 @@ int main(int argc, char* argv[]) {
       monkey->setPosition(-gap * (N / 2) + gap * row,
                           -gap * (N / 2) + gap * col,
                           2.0 + gap * (row * N + col));
-      monkey->setAppearance("blue");
     }
   }
 
-  /// launch raisim server
+  /// launch raisim servear
   raisim::RaisimServer server(&world);
   server.launchServer();
-  server.setCameraPositionAndLookAt({5,0,2}, {0,0,2});
 
   while (1) {
-    RS_TIMED_LOOP(int(world.getTimeStep()*1e6))
+    raisim::MSLEEP(2);
     server.integrateWorldThreadSafe();
   }
 
