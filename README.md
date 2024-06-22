@@ -107,7 +107,7 @@
 ## Installation
 __Essential 1.__ Dependencies
 > Install the following packages before using RaiSim: eigen library, cmake
-```shell
+```
 $ sudo apt install libeigen3-dev cmake
 ```
 
@@ -353,7 +353,28 @@ $ ./run_RMA_test.sh
 
 - __Why do you think errors compounded in the Direction Changing Policy?__  
   As can be seen from the method in previous point, we are currently inputting velocity vectors. Therefore, the original goal of showing a semicircular shape is to verify that the robot follows the changing velocity vectors accurately. This differs from following a path. We have trained a policy through reinforcement learning to move in the desired direction. However, I believe this does not qualify as a closed loop (although it might be possible once fully trained). The reason is that the inputs provided in reinforcement learning are reference values to guide the robot in the desired direction, not constraints to prevent deviation. Therefore, to control the error in the current position, a closed loop is required, which involves receiving the absolute position of the robot through sensors and comparing it with the desired path to adjust the movement trajectory. The policy we developed can be seen as a policy that allows movement in the modified direction during this process.
+  
 - __An integral action is needed in the reward function to eliminate offset errors.__  
+  We decided to address the current issue by refining the robot's controller in the simulation, which is currently structured with a feedforward control system rather than feedback control. Therefore, adjusting the integral gain to consider the error between the target value and the current value posed challenges. Consequently, we opted to enhance the precision of the robot's controller within the simulation.
+
+  Initially, we modified the method of verifying whether the robot accurately tracks user-input commands. We believed that evaluating whether the agent moves in accordance with the velocity vectors provided as input by the agent is clearer than evaluating the robot's current position. Thus, we made the following adjustments:
+
+  ```cpp
+    // penalty for exceed max velocity
+    r -= 20*(exp(5*abs(abs_v-max_speed))-1); 
+    
+    // penalty for z rotation and angle rotation
+    angular_r = - adaptiveAngularVelRewardCoeff_* (
+      2*exp(5*abs(z_rot)) 
+      + exp(0.1*abs(angle_[0]))-3.0);
+    
+    // penalty for exceed command direction
+    if (gv_[0] > (ac_[0]) || gv_[0] < (ac_[0]))
+       forward_r -= 20 * std::abs(gv_[0] - ac_[0]);
+    if (gv_[1] > (ac_[1]) || gv_[1] < (ac_[1]))
+       forward_r -= 20 * std::abs(gv_[1] - ac_[1]);
+  ```
+
   <img src="https://github.com/S-CHOI-S/RMA1Sim/assets/113012648/5c15a19b-2159-46ac-80fa-dc283e34d9a1"/>
 
 
