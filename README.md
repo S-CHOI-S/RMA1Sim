@@ -359,21 +359,26 @@ $ ./run_RMA_test.sh
 
   Initially, we modified the method of verifying whether the robot accurately tracks user-input commands. We believed that evaluating whether the agent moves in accordance with the velocity vectors provided as input by the agent is clearer than evaluating the robot's current position. Thus, we made the following adjustments:
 
-  ```cpp
-    // penalty for exceed max velocity
-    r -= 20*(exp(5*abs(abs_v-max_speed))-1); 
-    
-    // penalty for z rotation and angle rotation
-    angular_r = - adaptiveAngularVelRewardCoeff_* (
-      2*exp(5*abs(z_rot)) 
-      + exp(0.1*abs(angle_[0]))-3.0);
-    
-    // penalty for exceed command direction
-    if (gv_[0] > (ac_[0]) || gv_[0] < (ac_[0]))
-       forward_r -= 20 * std::abs(gv_[0] - ac_[0]);
-    if (gv_[1] > (ac_[1]) || gv_[1] < (ac_[1]))
-       forward_r -= 20 * std::abs(gv_[1] - ac_[1]);
-  ```
+  Changes in the environment:
+  - To make values closer to zero for speed limits and angle rotation changes, we use exponential functions. This imposes a significant penalty if values deviate from zero. Additionally, limits are enforced if any speed value exceeds its range without any margin.
+  - The training range has been extended to 360 degrees to prevent large errors at the ends compared to the previous policy.
+  - Finally, the training time for a single target speed has been increased to create a walking policy that maintains the same action for a longer period.
+  
+    ```cpp
+      // penalty for exceed max velocity
+      r -= 20*(exp(5*abs(abs_v-max_speed))-1); 
+      
+      // penalty for z rotation and angle rotation
+      angular_r = - adaptiveAngularVelRewardCoeff_* (
+        2*exp(5*abs(z_rot)) 
+        + exp(0.1*abs(angle_[0]))-3.0);
+      
+      // penalty for exceed command direction
+      if (gv_[0] > (ac_[0]) || gv_[0] < (ac_[0]))
+         forward_r -= 20 * std::abs(gv_[0] - ac_[0]);
+      if (gv_[1] > (ac_[1]) || gv_[1] < (ac_[1]))
+         forward_r -= 20 * std::abs(gv_[1] - ac_[1]);
+    ```
 
   <img src="https://github.com/S-CHOI-S/RMA1Sim/assets/113012648/5c15a19b-2159-46ac-80fa-dc283e34d9a1"/>
 
