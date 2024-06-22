@@ -353,7 +353,8 @@ $ ./run_RMA_test.sh
 
 - __Why do you think errors compounded in the Direction Changing Policy?__  
   As can be seen from the method in previous point, we are currently inputting velocity vectors. Therefore, the original goal of showing a semicircular shape is to verify that the robot follows the changing velocity vectors accurately. This differs from following a path. We have trained a policy through reinforcement learning to move in the desired direction. However, I believe this does not qualify as a closed loop (although it might be possible once fully trained). The reason is that the inputs provided in reinforcement learning are reference values to guide the robot in the desired direction, not constraints to prevent deviation. Therefore, to control the error in the current position, a closed loop is required, which involves receiving the absolute position of the robot through sensors and comparing it with the desired path to adjust the movement trajectory. The policy we developed can be seen as a policy that allows movement in the modified direction during this process.
-- __An integral action is needed in the reward function to eliminate offset errors.__
+- __An integral action is needed in the reward function to eliminate offset errors.__  
+  <img src="https://github.com/S-CHOI-S/RMA1Sim/assets/113012648/5c15a19b-2159-46ac-80fa-dc283e34d9a1"/>
 
 
 ### Reference
