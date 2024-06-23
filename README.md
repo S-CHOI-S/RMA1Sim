@@ -319,8 +319,6 @@ $ ./run_RMA_test.sh
 
 </br>
 
-## Discussion
-
 ## Feedback Q&A
 - __How did you modulate the reward function, particularly after jumping to landing?__  
   To design the motion for jumping to the desired location, we divided the process into three stages: the takeoff phase, the aerial phase, and the landing phase, as different actions are required for each state.
@@ -380,7 +378,10 @@ $ ./run_RMA_test.sh
          forward_r -= 20 * std::abs(gv_[1] - ac_[1]);
     ```
 
+  ❗ The graph below shows the results obtained using the modified method, indicating the x and y velocities, positions, and finally the magnitude of the total speed.
   <img src="https://github.com/S-CHOI-S/RMA1Sim/assets/113012648/5c15a19b-2159-46ac-80fa-dc283e34d9a1"/>
+
+## Discussion
 
 
 ### Reference
