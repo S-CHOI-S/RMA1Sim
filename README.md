@@ -1,4 +1,4 @@
-# Developing an Adaptive Locomotion Strategy for a Quadruped Robot
+# Efficient and Adaptive Quadrupedal Locomotion on Diverse Terrains Using Advanced RL Techniques
 #### [MEU5053] Machine Learning And Programming (2024Y: First Semester)  
 > This project referred to Antonilo's research on [rl_locomotion](https://github.com/antonilo/rl_locomotion)
 
@@ -378,11 +378,32 @@ $ ./run_RMA_test.sh
          forward_r -= 20 * std::abs(gv_[1] - ac_[1]);
     ```
 
-  ❗ The graph below shows the results obtained using the modified method, indicating the x and y velocities, positions, and finally the magnitude of the total speed.
+  ❗ The graph below shows the results obtained using the modified method, indicating the __x and y velocities, positions, and finally the magnitude of the total speed__.
   <img src="https://github.com/S-CHOI-S/RMA1Sim/assets/113012648/5c15a19b-2159-46ac-80fa-dc283e34d9a1"/>
+  
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://github.com/S-CHOI-S/RMA1Sim/assets/113012648/98d66c47-9500-4e9a-902f-43ff6facf3f8"/>
+  
+  ❗ As a result of utilizing the revised policy, we observed more accurate tracking of the user's commands!
+
+</br>
 
 ## Discussion
+- __Summary of Key Findings and Interpretation__  
+  This study aimed to develop adaptive walking strategies for quadruped robots using PPO, RMA, DIAYN, and jumping algorithms. The simulation results showed significant improvements in the robot's walking strategies and stability across various terrains. Specifically, these algorithms maintained high performance even with unexpected terrain changes due to their real-time adaptability.
 
+- __Significance and Contributions of the Study__  
+  This research makes significant contributions to the enhancement of quadruped robots' walking abilities and strategies through reinforcement learning. Implementing real-time adaptability on diverse and discontinuous terrains distinguishes this study from previous research. This improvement enhances the potential for practical applications in exploration, disaster response, and other real-world scenarios.
+
+- __Limitations__  
+  This study was primarily tested in a simulation environment, and its applicability in real-world settings has not been fully validated. The simulation model may not completely reflect all real-world variables and conditions, necessitating further testing in actual environments. Additionally, the information currently used to control the robot is limited. Utilizing vision sensors or LiDAR could improve control accuracy.
+
+- __Future Research Directions__  
+  Future research will focus on enhancing usability in real-world environments by incorporating vision sensors or LiDAR. This will allow the current open-loop controller to be converted into a closed-loop feedback system, significantly improving control performance for precise positioning of the robot. Moreover, algorithms validated in simulations need to be rigorously tested in real-world scenarios. By doing so, we aim to enhance adaptability across more varied environments, securing the performance required for tasks such as disaster response, military operations, and exploration.
+
+- __Overall Conclusion__  
+  This study significantly contributes to the development of adaptive walking strategies for quadruped robots through reinforcement learning, suggesting potential applications in various real-world scenarios.
+
+</br>
 
 ### Reference
 - https://raisim.com/
