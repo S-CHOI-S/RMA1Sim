@@ -165,6 +165,7 @@ $ ./build_raisimLib.sh
 > [!Note]
 > Our repository contains code related to [RMA](https://github.com/S-CHOI-S/RMA1Sim/tree/RMA), [multi_direction](https://github.com/S-CHOI-S/RMA1Sim/tree/multi_direction), and [jump](https://github.com/S-CHOI-S/RMA1Sim/tree/jump), each under __different tags__.  
 > You can set the desired version and run the code by using `git checkout [desired tag name]`!
+> > (240625 update) The current master branch contains the same content as the RMA tag!
 
 __Step 1.__ Train the policy
 > You may run the code in your raisimLib directory!
